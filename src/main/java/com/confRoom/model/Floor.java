@@ -1,14 +1,16 @@
-package com.comfRoom.model;
+package com.confRoom.model;
 import java.util.*;
 
 public class Floor {
 	
 	private int floorId;
+	private String floorName;
 	private Map<Integer,ConfRoom> confRooms;
 	
-	public Floor() {
-		this.floorId= (int)Math.random()*100;
+	public Floor(String name) {
+		this.floorId= (int)(Math.random()*100);
 		this.confRooms= new HashMap<Integer,ConfRoom>();
+		this.floorName=name;
 	}
 	
 	/*

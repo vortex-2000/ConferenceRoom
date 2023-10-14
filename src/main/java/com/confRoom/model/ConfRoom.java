@@ -1,4 +1,4 @@
-package com.comfRoom.model;
+package com.confRoom.model;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,13 +9,15 @@ public class ConfRoom {
 	private Boolean[] slots;
 	private Map<Integer,Booking> bookings;
 	int maxCapacity;
+	String confRoomName;
 	
 	
-	public ConfRoom(int maxCapacity) {
-		this.confRoomId= (int)Math.random()*100;
+	public ConfRoom(int maxCapacity,String confRoom) {
+		this.confRoomId= (int)(Math.random()*100);
 		this.slots= new Boolean [24];
 		this.bookings=new HashMap<Integer,Booking>();
 		this.maxCapacity=maxCapacity;
+		this.confRoomName=confRoomName;
 	}
 	
 	public int getConfRoomId() {

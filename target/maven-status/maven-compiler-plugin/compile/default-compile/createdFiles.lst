@@ -1,0 +1,12 @@
+com\confRoom\service\BookingService.class
+com\confRoom\repository\IBuildingRepository.class
+Program.class
+com\confRoom\model\Building.class
+com\confRoom\repository\BuildingRepository.class
+com\confRoom\repository\IBookingRepository.class
+com\confRoom\model\Floor.class
+com\confRoom\model\User.class
+com\confRoom\model\ConfRoom.class
+com\confRoom\model\Booking.class
+com\confRoom\repository\BookingRepository.class
+com\confRoom\service\IBookingService.class

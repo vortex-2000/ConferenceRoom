@@ -1,4 +1,4 @@
-package com.comfRoom.model;
+package com.confRoom.model;
 
 public class Booking {
 	
@@ -8,7 +8,7 @@ public class Booking {
 	private int[]slot;
 	
 	public Booking(int userId,ConfRoom confRoom) {
-		this.bookingId=(int)Math.random()*1000;
+		this.bookingId=(int)(Math.random()*1000);
 		this.userId=userId;
 		this.confRoom=confRoom;
 	}
@@ -27,6 +27,10 @@ public class Booking {
 	
 	public ConfRoom getConfRoom() {
 		return this.confRoom;
+	}
+	
+	public int getUserId() {
+		return this.userId;
 	}
 	
 }

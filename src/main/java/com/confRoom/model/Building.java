@@ -1,4 +1,4 @@
-package com.comfRoom.model;
+package com.confRoom.model;
 
 import java.util.*;
 
@@ -9,7 +9,7 @@ public class Building {
 	private Map<Integer,Floor>floors;
 	
 	public Building(String name){
-		this.buildingId=(int)Math.random()*100;
+		this.buildingId=(int)(Math.random()*100);
 		this.buildingName=name;
 		this.floors= new HashMap<Integer,Floor>();
 	}

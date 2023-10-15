@@ -1,5 +1,6 @@
 package com.confRoom.model;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ public class ConfRoom {
 	public ConfRoom(int maxCapacity,String confRoom) {
 		this.confRoomId= (int)(Math.random()*100);
 		this.slots= new Boolean [24];
+		Arrays.fill(this.slots, false);
 		this.bookings=new HashMap<Integer,Booking>();
 		this.maxCapacity=maxCapacity;
 		this.confRoomName=confRoomName;
@@ -34,10 +36,11 @@ public class ConfRoom {
 	}
 	
 	public Boolean[] getSlots() {
+		//System.out.println(this.slots);
 		return this.slots;
 	}
 	public Boolean setSlots(int[] slot) {
-		for(int i=slot[0];i<=slot[1];i++) {
+		for(int i=slot[0]+1;i<=slot[1];i++) {
 			if(this.slots[i]==true)
 				return false;
 			this.slots[i]=true;		
@@ -50,7 +53,7 @@ public class ConfRoom {
 	}
 	
 	public void unsetSlots(int[] slot) {
-		for(int i=slot[0];i<=slot[1];i++) {
+		for(int i=slot[0]+1;i<=slot[1];i++) {
 			this.slots[i]=false;		
 		}
 		return;

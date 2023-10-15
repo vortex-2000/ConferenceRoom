@@ -1,5 +1,7 @@
 package com.confRoom.service;
 
+import java.util.Arrays;
+
 import com.confRoom.model.*;
 import com.confRoom.repository.BookingRepository;
 import com.confRoom.repository.BuildingRepository;
@@ -16,7 +18,7 @@ public class BookingService {
 		
 		Boolean[] slots= confRoom.getSlots();
 		
-		for(int i=slot[0];i<=slot[1];i++) {
+		for(int i=slot[0]+1;i<=slot[1];i++) {
 			if(slots[i]==true) {
 				System.out.println("Slot Unavailable");
 				return false;
@@ -51,11 +53,11 @@ public class BookingService {
 		if(!sizeCheck(confRoom, capacity))		
 			return;
 
-		Booking booking= new Booking(userId,confRoom);
+		Booking booking= new Booking(userId,confRoom,slot);
 				
 		bookingRepo.AddBooking(confRoom, booking,user);
 		
-		System.out.println("Booking Completed");
+		System.out.println("Booking Completed. Your booking id is: " + booking.getBookingId());
 	}
 	
 	public void CancelBooking(int bookingId) {

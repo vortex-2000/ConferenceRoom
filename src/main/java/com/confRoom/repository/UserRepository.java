@@ -26,6 +26,7 @@ public class UserRepository {
 	
 	public int AddUser(String name){	
 		User user= new User(name);
+		Users.put(user.getUserId(), user);
 		return user.getUserId();
 	}
 }

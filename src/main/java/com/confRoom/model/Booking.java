@@ -7,10 +7,13 @@ public class Booking {
 	private ConfRoom confRoom;
 	private int[]slot;
 	
-	public Booking(int userId,ConfRoom confRoom) {
+	public Booking(int userId,ConfRoom confRoom, int[]slot) {
 		this.bookingId=(int)(Math.random()*1000);
 		this.userId=userId;
 		this.confRoom=confRoom;
+		this.slot=new int[2];
+		this.slot[0]=slot[0];
+		this.slot[1]=slot[1];
 	}
 	
 	public int getBookingId() {

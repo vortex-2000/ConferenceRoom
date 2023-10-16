@@ -3,20 +3,27 @@ package com.confRoom.model;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
+
+
 
 public class ConfRoom {
 	
 	private int confRoomId;
-	private Boolean[] slots;
+	
+	private Map<Integer, TreeSet<Slot>> bookSlot; //treeset //date
+	
+	
+	//private Boolean[] slots; //TO DO//////////////////////////////////////////////////
 	private Map<Integer,Booking> bookings;
 	int maxCapacity;
 	String confRoomName;
 	
 	
-	public ConfRoom(int maxCapacity,String confRoom) {
+	public ConfRoom(int maxCapacity,String confRoomName) {
 		this.confRoomId= (int)(Math.random()*100);
-		this.slots= new Boolean [24];
-		Arrays.fill(this.slots, false);
+		this.bookSlot= new HashMap<Integer, TreeSet<Slot>>();
+		//Arrays.fill(this.slots, false);
 		this.bookings=new HashMap<Integer,Booking>();
 		this.maxCapacity=maxCapacity;
 		this.confRoomName=confRoomName;
@@ -35,27 +42,30 @@ public class ConfRoom {
 		return this.maxCapacity;
 	}
 	
-	public Boolean[] getSlots() {
+	public Map<Integer, TreeSet<Slot>> getSlots() {
 		//System.out.println(this.slots);
-		return this.slots;
+		return this.bookSlot;
 	}
-	public Boolean setSlots(int[] slot) {
-		for(int i=slot[0]+1;i<=slot[1];i++) {
-			if(this.slots[i]==true)
-				return false;
-			this.slots[i]=true;		
-		}
-		return true;
+	public void setSlots(int day, int[] slot) {
+		
+		Slot slotToAdd= new Slot();
+		slotToAdd.setSlotTime(slot);
+		TreeSet<Slot> slotsOfDay= this.bookSlot.get(day);
+		if(slotsOfDay==null)
+			slotsOfDay= new TreeSet<Slot>();
+		
+		slotsOfDay.add(slotToAdd);
+		this.bookSlot.put(day,slotsOfDay);
+
 	}
 	
 	public void setBooking(Booking booking) {
 		this.bookings.put(booking.getBookingId(),booking);
 	}
 	
-	public void unsetSlots(int[] slot) {
-		for(int i=slot[0]+1;i<=slot[1];i++) {
-			this.slots[i]=false;		
-		}
+	public void unsetSlots(int day, Slot slotToRemove) {
+		TreeSet<Slot> slotsOfDay= this.bookSlot.get(day);
+		slotsOfDay.remove(slotToRemove);
 		return;
 	}
 	

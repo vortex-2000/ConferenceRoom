@@ -5,16 +5,19 @@ import java.util.Arrays;
 import com.confRoom.model.*;
 import com.confRoom.repository.BookingRepository;
 import com.confRoom.repository.BuildingRepository;
+import com.confRoom.repository.ConfRoomRepository;
+import com.confRoom.repository.FloorRepository;
 import com.confRoom.repository.UserRepository;
-import com.confRoom.repository.UtilRepository;
+
 
 public class BookingService {
 	
 	static public BookingRepository bookingRepo= BookingRepository.getInstance(); 
 	static public BuildingRepository buildingRepo= BuildingRepository.getInstance();
 	static public UserRepository userRepo= UserRepository.getInstance(); 
+	public ConfRoomRepository confRoomRepo= new ConfRoomRepository();
 	
-	public Boolean RoomAvailable(ConfRoom confRoom, int[]slot) {
+	private Boolean roomAvailable(ConfRoom confRoom, int[]slot) {
 		
 		Boolean[] slots= confRoom.getSlots();
 		
@@ -27,49 +30,47 @@ public class BookingService {
 		return true;
 	}
 	
-	public Boolean sizeCheck(ConfRoom confRoom, int capacity) {
-		
+	private Boolean isCapacitySufficient(ConfRoom confRoom, int capacity) { //isCapacityAvailable   (IS) START BOOL METHOD
+		//private
 		if(confRoom.getMaxCapacity()<capacity) {
 			System.out.println("Size is less than your requirements, please try a different room");
 			return false;
 		}
 		return true;
 	}
-	
-	public void BookConfRoom(int buildingId, int floorId, int confRoomId, int[]slot, int userId, int capacity) {
+	//TRY CATCH for runtime exceptions: generic message custom exception model class
+	public void bookConfRoom(int buildingId, int floorId, int confRoomId, int[]slot, int userId, int capacity) {
 		
-		ConfRoom confRoom = UtilRepository.CheckEntityPresence(buildingId,floorId,confRoomId);	
+		ConfRoom confRoom = confRoomRepo.checkConfRoomPresence(buildingId,floorId,confRoomId);	// Double DB call if not passed
 		if(confRoom==null)
 			return;
 		
-		User user = UtilRepository.CheckUserPresence(userId);
+		User user = userRepo.checkUserPresence(userId);
 		if(user==null)
 			return;
 		
-		//Check Availability
-		if(!RoomAvailable(confRoom, slot))
+	
+		if(!roomAvailable(confRoom, slot))
 			return;
 		
-		if(!sizeCheck(confRoom, capacity))		
+		if(!isCapacitySufficient(confRoom, capacity))		
 			return;
 
 		Booking booking= new Booking(userId,confRoom,slot);
 				
-		bookingRepo.AddBooking(confRoom, booking,user);
+		bookingRepo.addBooking(booking);
 		
 		System.out.println("Booking Completed. Your booking id is: " + booking.getBookingId());
 	}
 	
-	public void CancelBooking(int bookingId) {
+	public void cancelBooking(int bookingId) {
 		
-		Booking booking = UtilRepository.CheckBookingPresence(bookingId);
+		Booking booking = bookingRepo.checkBookingPresence(bookingId);
 		
 		if(booking==null) 
 			return;
 		
-		User user = UtilRepository.CheckUserPresence(booking.getUserId());
-		
-	    bookingRepo.DeleteBooking(booking,user);
+	    bookingRepo.deleteBooking(booking);
 	    
 	    System.out.println("Booking Cancelled");
 		

@@ -3,6 +3,8 @@ import java.util.Scanner;
 import com.confRoom.repository.BuildingRepository;
 import com.confRoom.service.BookingService;
 import com.confRoom.service.BuildingService;
+import com.confRoom.service.ConfRoomService;
+import com.confRoom.service.FloorService;
 import com.confRoom.service.UserService;
 
 public class Program {
@@ -11,7 +13,10 @@ public class Program {
 		// TODO Auto-generated method stub
 		BuildingService buildingService = new BuildingService();
 		UserService userService = new UserService();
-			BookingService bookingService = new BookingService();
+		FloorService floorService = new FloorService();
+		ConfRoomService confRoomService = new ConfRoomService();
+		BookingService bookingService = new BookingService();
+		
 		Scanner sc= new Scanner(System.in); //System.in is a standard input stream.
 		
 		int action=0;
@@ -26,7 +31,8 @@ public class Program {
 				System.out.println("Enter a building name: ");
 				sc.nextLine();
 				String bstr= sc.nextLine(); 
-				buildingService.ConstructBuilding(bstr);
+				int id_b=buildingService.constructBuilding(bstr);
+				System.out.println("A new building with name " + bstr + " and Id " + id_b + " has been added");
 				break;
 				
 			case 2:
@@ -35,7 +41,8 @@ public class Program {
 				System.out.println("Enter a floor name: ");
 				sc.nextLine();
 				String fstr= sc.nextLine(); 
-				buildingService.ConstructFloor(bid,fstr);
+				int id_f=floorService.constructFloor(bid,fstr);
+				if(id_f!=-1) System.out.println("A new floor with name " + fstr + " and Id " + id_f + " has been added");
 				break;
 				
 			case 3:
@@ -49,14 +56,15 @@ public class Program {
 				System.out.println("Enter a conference room name: ");
 				sc.nextLine();
 				String cstr= sc.nextLine(); 
-				buildingService.ConstructConfRoom(bid,fid,capacity,cstr);
+				int id_c=confRoomService.constructConfRoom(bid,fid,capacity,cstr);
+				if(id_c!=-1) System.out.println("A new conference room with name " + cstr + " and Id " + id_c + " has been added");
 				break;
 				
 			case 4:
 				System.out.println("Enter your name: ");
 				sc.nextLine();
 				String ustr= sc.nextLine();
-				int uid=userService.RegisterUser(ustr);
+				int uid=userService.registerUser(ustr);
 				break;
 				
 			case 5:
@@ -76,15 +84,26 @@ public class Program {
 				slot[1]= sc.nextInt();
 				System.out.println("Enter expected capacity: ");
 				capacity= sc.nextInt();
-				bookingService.BookConfRoom(bid, fid, cid, slot, uid, capacity);
+				bookingService.bookConfRoom(bid, fid, cid, slot, uid, capacity);
 				break;
 				
 			case 6:
 				System.out.println("Enter a booking id: ");
 				sc= new Scanner(System.in);
 				int bkid= sc.nextInt();
-				bookingService.CancelBooking(bkid);
+				bookingService.cancelBooking(bkid);
 				break;
+				
+			case 7:
+				System.out.println("Enter a building id: ");
+				sc= new Scanner(System.in);
+				bid= sc.nextInt();
+				System.out.println("Enter a floor id: ");
+				fid= sc.nextInt(); 
+				System.out.println("Enter a capacity: ");
+				capacity= sc.nextInt();
+				//confRoomService.searchConfRoom(bid,fid,capacity);
+				
 			
 			
 			

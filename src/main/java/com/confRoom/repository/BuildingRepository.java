@@ -19,28 +19,25 @@ public class BuildingRepository implements IBuildingRepository{
 	        	BuildingRepository_instance = new BuildingRepository(); 
 	  
 	        return BuildingRepository_instance; 
-	    } 
+	    }
 	 
+	 	public Building checkBuildingPresence(int buildingId) {
+			Building building=Buildings.get(buildingId);		
+			if(building==null)
+				System.out.println("The mentioned building dosen't exists");
+			return building;
+		}
+		
+		
+
 	
-	public int AddBuilding(String name) {
+	public int addBuilding(String name) {
 		Building building= new Building(name);
 		Buildings.put(building.getBuildingId(), building);
 		return building.getBuildingId();
 		
 	}
-	
-	public int AddFloor(Building building,String floorName) {
-		 
-		 Floor floor=new Floor(floorName);
-		 building.setFloor(floor);
-		 return floor.getFloorId();
-	}
-	
-	public int AddConfRoom(Floor floor,int maxCapacity,String confRoomName) {
-		
-		ConfRoom confRoom=new ConfRoom(maxCapacity,confRoomName);
-		floor.setConfRoom(confRoom);
-		return confRoom.getConfRoomId();
-	}
+	//////////////////// SEPARATE FOR FLOOR AND CONFROOM
+
 	
 }

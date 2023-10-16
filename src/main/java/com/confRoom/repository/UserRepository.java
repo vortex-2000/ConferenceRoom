@@ -21,10 +21,19 @@ public class UserRepository {
         	UserRepository_instance = new UserRepository(); 
   
         return UserRepository_instance; 
-    } 
+    }
+	
+	public User checkUserPresence(int userId) {
+		
+		User user= Users.get(userId);
+		if(user==null)
+			System.out.println("The mentioned user dosen't exists");
+		return user;
+	}
+	
  
 	
-	public int AddUser(String name){	
+	public int addUser(String name){	
 		User user= new User(name);
 		Users.put(user.getUserId(), user);
 		return user.getUserId();

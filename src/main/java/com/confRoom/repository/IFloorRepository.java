@@ -1,5 +1,5 @@
 package com.confRoom.repository;
 
-public interface IUtilRepository {
+public interface IFloorRepository {
 
 }

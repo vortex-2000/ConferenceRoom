@@ -22,13 +22,29 @@ public class BookingService {
 	public ConfRoomRepository confRoomRepo= new ConfRoomRepository();
 	
 	
+	private Boolean isValidTime(String[]slot) throws ParseException
+	{
+		SimpleDateFormat parser = new SimpleDateFormat("HH:mm");
+		
+		Date currStartTime = parser.parse(slot[0]);
+		
+		
+		if(currStartTime.equals(parser.parse("0:00")) || currStartTime.after(parser.parse("0:00"))) 
+		{
+			return false;
+		}
+		return true;
+		
+	}
 	
-	private Boolean isValidTime(String[]slot) throws ParseException {
+	
+	private Boolean isValidDuration(String[]slot) throws ParseException {
 		
 		SimpleDateFormat parser = new SimpleDateFormat("HH:mm");
 		
 		Date currStartTime = parser.parse(slot[0]);
 		Date currEndTime = parser.parse(slot[1]);
+		
 		
 		long difference = (currEndTime.getTime() - currStartTime .getTime())/(60 * 60 * 1000) % 24;
 		
@@ -72,6 +88,11 @@ public class BookingService {
 			Date startTime = parser.parse(slotEntry.getSlotStartTime());
 			Date endTime = parser.parse(slotEntry.getSlotEndTime());
 			
+			if(endTime.equals(parser.parse("0:00")) || endTime.after(parser.parse("0:00"))) {
+				System.out.println("hi");
+				if(currStartTime.after(startTime)) return false;
+			};
+			
 			
 			 if(startTime.after(currEndTime)) //OPTIMIZATION  
 				  break;
@@ -97,11 +118,21 @@ public class BookingService {
 		return true;
 	}
 	
-	private Boolean isValidDate(LocalDate bookDate) throws ParseException {
+	private Boolean isValidFutureDate(LocalDate bookDate) throws ParseException {
 		
 		LocalDate maxFutureDate=LocalDate.now().plusDays(10);	
 		
 		if(bookDate.isAfter(maxFutureDate)) {
+			return false;
+		}
+		return true;
+	}
+	
+	private Boolean isValidDate(LocalDate bookDate) throws ParseException {
+		
+		LocalDate currDate=LocalDate.now();	
+		
+		if(bookDate.isBefore(currDate) || bookDate.isEqual(currDate)) {
 			return false;
 		}
 		return true;
@@ -119,11 +150,21 @@ public class BookingService {
 		LocalDate dt = LocalDate.parse(date, formatter);
 		
 		if(!isValidDate(dt)) {
-			System.out.println("Booking can only be made for 10 days in future");
+			System.out.println("New bookings starts from tomorrow.");
+			return;
+		}
+		
+		if(!isValidFutureDate(dt)) {
+			System.out.println("Booking can only be made for 10 days in future.");
 			return;
 		}
 		
 		if(!isValidTime(slot)) {
+			System.out.println("Please enter valid start time.");
+			return;
+		}
+		
+		if(!isValidDuration(slot)) {
 			System.out.println("Booking cannot be made for more than 12 hours.");
 			return;
 		}

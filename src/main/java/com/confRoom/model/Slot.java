@@ -1,20 +1,20 @@
 package com.confRoom.model;
 
 public class Slot {
-	private  int startTime;
-	private int endTime;
+	private  String startTime;
+	private String endTime;
 	
-	public int getSlotStartTime(){
+	public String getSlotStartTime(){
 		return this.startTime;
 	}
 	
-	public int getSlotEndTime(){
+	public String getSlotEndTime(){
 		return this.endTime;
 	}
 	
-	public void setSlotTime(int[] slot) {
+	public void setSlotTime(String[] slot) {
 		this.startTime=slot[0];
-		this.endTime=slot[0];
+		this.endTime=slot[1];
 	}
 	
 }

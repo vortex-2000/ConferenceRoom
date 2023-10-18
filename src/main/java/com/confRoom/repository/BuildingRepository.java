@@ -37,7 +37,6 @@ public class BuildingRepository implements IBuildingRepository{
 		return building.getBuildingId();
 		
 	}
-	//////////////////// SEPARATE FOR FLOOR AND CONFROOM
 
 	
 }

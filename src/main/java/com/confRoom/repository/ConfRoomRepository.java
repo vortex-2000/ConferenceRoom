@@ -25,4 +25,8 @@ public class ConfRoomRepository {
 		floor.setConfRoom(confRoom);
 		return confRoom.getConfRoomId();
 	}
+	
+	public void getConfRooms(Floor floor) {
+		
+	}
 }

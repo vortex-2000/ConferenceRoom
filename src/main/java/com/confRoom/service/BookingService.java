@@ -1,13 +1,17 @@
 package com.confRoom.service;
 
-import java.util.Arrays;
+
 
 import com.confRoom.model.*;
-import com.confRoom.repository.BookingRepository;
-import com.confRoom.repository.BuildingRepository;
-import com.confRoom.repository.ConfRoomRepository;
-import com.confRoom.repository.FloorRepository;
-import com.confRoom.repository.UserRepository;
+import com.confRoom.repository.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeSet;
 
 
 public class BookingService {
@@ -17,16 +21,70 @@ public class BookingService {
 	static public UserRepository userRepo= UserRepository.getInstance(); 
 	public ConfRoomRepository confRoomRepo= new ConfRoomRepository();
 	
-	private Boolean roomAvailable(ConfRoom confRoom, int[]slot) {
+	
+	
+	private Boolean isValidTime(String[]slot) throws ParseException {
 		
-		Boolean[] slots= confRoom.getSlots();
+		SimpleDateFormat parser = new SimpleDateFormat("HH:mm");
 		
-		for(int i=slot[0]+1;i<=slot[1];i++) {
-			if(slots[i]==true) {
-				System.out.println("Slot Unavailable");
-				return false;
-			}
+		Date currStartTime = parser.parse(slot[0]);
+		Date currEndTime = parser.parse(slot[1]);
+		
+		long difference = (currEndTime.getTime() - currStartTime .getTime())/(60 * 60 * 1000) % 24;
+		
+		
+		if(difference<0 && (24+difference)>12) return false;
+		
+		return difference<12;
+		
+	}
+	
+	
+	private Boolean roomAvailable(ConfRoom confRoom,String date, String[]slot) throws ParseException {
+		
+		Map<String, TreeSet<Slot>> slots= confRoom.getSlots();
+		
+		TreeSet<Slot> slotsOfDay=slots.get(date);
+		SimpleDateFormat parser = new SimpleDateFormat("HH:mm");
+		Date currStartTime = parser.parse(slot[0]);
+		Date currEndTime = parser.parse(slot[1]);
+		
+		
+		
+		if(currEndTime.before(currStartTime)) {
+			LocalDate todayDate = LocalDate.parse(date);
+			LocalDate tomorrowDate=todayDate.plusDays(1);
+			
+			TreeSet<Slot> tomorrowSlots=slots.get(tomorrowDate.toString());
+			if(tomorrowSlots==null) return true;
+			Slot tomorrowSlot=tomorrowSlots.first();
+			Date tomorrowStartTime=parser.parse(tomorrowSlot.getSlotStartTime());
+			
+			return tomorrowStartTime.after(currEndTime);
 		}
+		
+		if(slotsOfDay==null)
+			return true; 
+			
+		for(Slot slotEntry : slotsOfDay) {
+			 
+			
+			Date startTime = parser.parse(slotEntry.getSlotStartTime());
+			Date endTime = parser.parse(slotEntry.getSlotEndTime());
+			
+			
+			 if(startTime.after(currEndTime)) //OPTIMIZATION  
+				  break;
+			  
+			  if((currEndTime.before(startTime)) || (currStartTime.after(endTime))) continue;
+			  
+			  else if((currEndTime.equals(startTime)) || (currStartTime.equals(endTime))) continue;
+			  
+			  else {
+				  return false;
+			  }
+		}
+		
 		return true;
 	}
 	
@@ -38,9 +96,38 @@ public class BookingService {
 		}
 		return true;
 	}
-	//TRY CATCH for runtime exceptions: generic message custom exception model class
-	public void bookConfRoom(int buildingId, int floorId, int confRoomId, int[]slot, int userId, int capacity) {
+	
+	private Boolean isValidDate(LocalDate bookDate) throws ParseException {
 		
+		LocalDate maxFutureDate=LocalDate.now().plusDays(10);	
+		
+		if(bookDate.isAfter(maxFutureDate)) {
+			return false;
+		}
+		return true;
+	}
+	
+	
+	//TRY CATCH for runtime exceptions: generic message custom exception model class
+	@SuppressWarnings("deprecation")
+	public void bookConfRoom(int buildingId, int floorId, int confRoomId, int userId, int capacity, String date, String[]slot) throws ParseException {
+		
+		
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		formatter = formatter.withLocale( Locale.ROOT );
+		LocalDate dt = LocalDate.parse(date, formatter);
+		
+		if(!isValidDate(dt)) {
+			System.out.println("Booking can only be made for 10 days in future");
+			return;
+		}
+		
+		if(!isValidTime(slot)) {
+			System.out.println("Booking cannot be made for more than 12 hours.");
+			return;
+		}
+	
 		ConfRoom confRoom = confRoomRepo.checkConfRoomPresence(buildingId,floorId,confRoomId);	// Double DB call if not passed
 		if(confRoom==null)
 			return;
@@ -50,13 +137,15 @@ public class BookingService {
 			return;
 		
 	
-		if(!roomAvailable(confRoom, slot))
+		if(!roomAvailable(confRoom,date, slot)) {
+			 System.out.println("Sorry the required slot is already booked");
 			return;
+		}
 		
 		if(!isCapacitySufficient(confRoom, capacity))		
 			return;
 
-		Booking booking= new Booking(userId,confRoom,slot);
+		Booking booking= new Booking(userId,confRoom,date,slot);
 				
 		bookingRepo.addBooking(booking);
 		

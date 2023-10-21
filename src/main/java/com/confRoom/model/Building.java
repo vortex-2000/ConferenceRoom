@@ -26,4 +26,7 @@ public class Building {
 		return this.floors.get(floorId); 
 	}
 	
+	public String getBuildingName() {
+		return this.buildingName;
+	}
 }

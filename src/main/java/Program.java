@@ -81,7 +81,7 @@ public class Program {
 				String[] slot= new String[2];
 				System.out.println("Enter booking starting time in HH:mm format:");
 				sc.nextLine();
-				slot[0]= sc.nextLine();
+				slot[0]= sc.nextLine();			//slot class
 				System.out.println("Enter booking ending time in HH:mm format: ");
 				slot[1]= sc.nextLine();
 				System.out.println("Enter expected capacity: ");
@@ -107,8 +107,24 @@ public class Program {
 				fid= sc.nextInt(); 
 				System.out.println("Enter a capacity: ");
 				capacity= sc.nextInt();
-				//confRoomService.searchConfRoom(bid,fid,capacity);
+				slot= new String[2];
+				System.out.println("Enter booking starting time in HH:mm format:");
+				sc.nextLine();
+				slot[0]= sc.nextLine();			//slot class
+				System.out.println("Enter booking ending time in HH:mm format: ");
+				slot[1]= sc.nextLine();
+				System.out.println("Enter the date in yyyy-mm-dd format: ");
+				date= sc.nextLine(); 
+				bookingService.searchRooms(bid,fid,date,slot,capacity);
+				break;
 				
+				
+			case 8:
+				System.out.println("Enter a user id: ");
+				sc= new Scanner(System.in);
+				uid= sc.nextInt();
+				bookingService.listBookings(uid);
+				break;
 			
 			
 			

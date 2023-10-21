@@ -28,4 +28,12 @@ public class Floor {
 	public int getFloorId() {
 		return this.floorId;
 	}
+	
+	public String getFloorName() {
+		return this.floorName;
+	}
+	
+	public Map<Integer,ConfRoom> getConfRooms(){
+		return this.confRooms;
+	}
 }

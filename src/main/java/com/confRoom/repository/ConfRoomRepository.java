@@ -19,9 +19,9 @@ public class ConfRoomRepository {
 	}
  
 	
-	public int addConfRoom(Floor floor,int maxCapacity,String confRoomName) {
+	public int addConfRoom(Floor floor,int maxCapacity,String confRoomName, String buildingName) {
 		
-		ConfRoom confRoom=new ConfRoom(maxCapacity,confRoomName);
+		ConfRoom confRoom=new ConfRoom(maxCapacity,confRoomName, floor.getFloorName(),buildingName);
 		floor.setConfRoom(confRoom);
 		return confRoom.getConfRoomId();
 	}

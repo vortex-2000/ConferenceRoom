@@ -14,10 +14,12 @@ public class ConfRoomService {
 	public int constructConfRoom(int id_b,int id_f,int capacity,String name) {
 		
 		Floor floor= floorRepo.checkFloorPresence(id_b,id_f);
+		
 		if(floor==null)
 			return -1;
+		String buildingName= buildingRepo.Buildings.get(id_b).getBuildingName();
 		
-		return confRoomRepo.addConfRoom(floor, capacity, name);	
+		return confRoomRepo.addConfRoom(floor, capacity, name, buildingName);	
 	}
 	
 	/*

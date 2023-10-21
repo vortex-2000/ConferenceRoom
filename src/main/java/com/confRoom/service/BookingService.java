@@ -1,7 +1,5 @@
 package com.confRoom.service;
 
-
-
 import com.confRoom.model.*;
 import com.confRoom.repository.*;
 import java.text.ParseException;
@@ -20,23 +18,10 @@ public class BookingService {
 	static public BuildingRepository buildingRepo= BuildingRepository.getInstance();
 	static public UserRepository userRepo= UserRepository.getInstance(); 
 	public ConfRoomRepository confRoomRepo= new ConfRoomRepository();
+	public FloorRepository floorRepo= new FloorRepository();
 	
 	
-	private Boolean isValidTime(String[]slot) throws ParseException
-	{
-		SimpleDateFormat parser = new SimpleDateFormat("HH:mm");
-		
-		Date currStartTime = parser.parse(slot[0]);
-		
-		
-		if(currStartTime.equals(parser.parse("0:00")) || currStartTime.after(parser.parse("0:00"))) 
-		{
-			return false;
-		}
-		return true;
-		
-	}
-	
+
 	
 	private Boolean isValidDuration(String[]slot) throws ParseException {
 		
@@ -56,7 +41,7 @@ public class BookingService {
 	}
 	
 	
-	private Boolean roomAvailable(ConfRoom confRoom,String date, String[]slot) throws ParseException {
+	private Boolean isRoomAvailable(ConfRoom confRoom,String date, String[]slot) throws ParseException {
 		
 		Map<String, TreeSet<Slot>> slots= confRoom.getSlots();
 		
@@ -65,18 +50,31 @@ public class BookingService {
 		Date currStartTime = parser.parse(slot[0]);
 		Date currEndTime = parser.parse(slot[1]);
 		
+		LocalDate todayDate = LocalDate.parse(date);
 		
-		
-		if(currEndTime.before(currStartTime)) {
-			LocalDate todayDate = LocalDate.parse(date);
+		if(currEndTime.before(currStartTime)) {							//SPECIAL CASE (NEW TILL MIDNIGHT BOOKING): check next day
+			
 			LocalDate tomorrowDate=todayDate.plusDays(1);
 			
 			TreeSet<Slot> tomorrowSlots=slots.get(tomorrowDate.toString());
-			if(tomorrowSlots==null) return true;
+			if(tomorrowSlots!=null) {
 			Slot tomorrowSlot=tomorrowSlots.first();
 			Date tomorrowStartTime=parser.parse(tomorrowSlot.getSlotStartTime());
 			
 			return tomorrowStartTime.after(currEndTime);
+			}
+		}
+		
+		
+							
+		LocalDate yesterdayDate=todayDate.minusDays(1);			//SPECIAL CASE (NEW FROM MIDNIGHT BOOKING): check previous day
+		
+		TreeSet<Slot> yesterdaySlots=slots.get(yesterdayDate.toString());
+		if(yesterdaySlots!=null) {
+		Slot yesterdaySlot=yesterdaySlots.last();
+		Date yesterdayEndTime=parser.parse(yesterdaySlot.getSlotEndTime());
+		if(yesterdayEndTime.after(currStartTime))
+			return false;
 		}
 		
 		if(slotsOfDay==null)
@@ -88,31 +86,30 @@ public class BookingService {
 			Date startTime = parser.parse(slotEntry.getSlotStartTime());
 			Date endTime = parser.parse(slotEntry.getSlotEndTime());
 			
-			if(endTime.equals(parser.parse("0:00")) || endTime.after(parser.parse("0:00"))) {
-				System.out.println("hi");
-				if(currStartTime.after(startTime)) return false;
-			};
+
+			if(endTime.before(startTime) || currEndTime.before(currStartTime)) {										//SPECIAL CASE (EXISTING MIDNIGHT BOOKING) check if our new booking is after this booking
+				if(currStartTime.after(startTime) || currEndTime.after(startTime)) 										//+
+					return false;																						//SPECIAL CASE (NEW TILL MIDNIGHT BOOKING) check if existing midnight booking
+																
+			}
 			
 			
 			 if(startTime.after(currEndTime)) //OPTIMIZATION  
 				  break;
 			  
-			  if((currEndTime.before(startTime)) || (currStartTime.after(endTime))) continue;
+			 if((currEndTime.after(startTime)) || (currStartTime.before(endTime))) return false;
 			  
-			  else if((currEndTime.equals(startTime)) || (currStartTime.equals(endTime))) continue;
-			  
-			  else {
-				  return false;
-			  }
+		
+
 		}
 		
 		return true;
+		
 	}
 	
-	private Boolean isCapacitySufficient(ConfRoom confRoom, int capacity) { //isCapacityAvailable   (IS) START BOOL METHOD
+	private Boolean isCapacitySufficient(ConfRoom confRoom, int capacity) {
 		//private
 		if(confRoom.getMaxCapacity()<capacity) {
-			System.out.println("Size is less than your requirements, please try a different room");
 			return false;
 		}
 		return true;
@@ -139,12 +136,13 @@ public class BookingService {
 	}
 	
 	
-	//TRY CATCH for runtime exceptions: generic message custom exception model class
+	//TRY CATCH for runtime exceptions: generic message custom exception model class 
+	///////////////// RETURN ID
 	@SuppressWarnings("deprecation")
 	public void bookConfRoom(int buildingId, int floorId, int confRoomId, int userId, int capacity, String date, String[]slot) throws ParseException {
 		
 		
-		
+		////////////////////////////////////////////SLOT KO ARRAY MAT RAKHO
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		formatter = formatter.withLocale( Locale.ROOT );
 		LocalDate dt = LocalDate.parse(date, formatter);
@@ -159,10 +157,7 @@ public class BookingService {
 			return;
 		}
 		
-		if(!isValidTime(slot)) {
-			System.out.println("Please enter valid start time.");
-			return;
-		}
+
 		
 		if(!isValidDuration(slot)) {
 			System.out.println("Booking cannot be made for more than 12 hours.");
@@ -178,13 +173,15 @@ public class BookingService {
 			return;
 		
 	
-		if(!roomAvailable(confRoom,date, slot)) {
+		if(!isRoomAvailable(confRoom,date, slot)) {
 			 System.out.println("Sorry the required slot is already booked");
 			return;
 		}
 		
-		if(!isCapacitySufficient(confRoom, capacity))		
+		if(!isCapacitySufficient(confRoom, capacity)) {
+			System.out.println("Size is less than your requirements, please try a different room");
 			return;
+		}
 
 		Booking booking= new Booking(userId,confRoom,date,slot);
 				
@@ -204,6 +201,51 @@ public class BookingService {
 	    
 	    System.out.println("Booking Cancelled");
 		
+	}
+	
+	public void listBookings(int userId) {
+		
+		User user = userRepo.checkUserPresence(userId);
+		
+		Map<Integer,Booking> bookings=user.getBookings();
+		
+		 for (Map.Entry<Integer,Booking> entry : bookings.entrySet()) { 
+	            System.out.println("Booking ID = " + entry.getKey() + ", Date = " + entry.getValue().getDate() + ", Slot time = " + entry.getValue().getSlot()[0] + " - " + entry.getValue().getSlot()[1]);
+	            System.out.println(entry.getValue().getConfRoom().getAddress());
+	            System.out.println("*****************************************************************************************************************");
+	            System.out.println();
+		 }
+	}
+	
+	
+	public void searchRooms(int buildingId, int floorId, String date,  String[] slot, int capacity) throws ParseException	
+	{
+
+		
+		Floor floor = floorRepo.checkFloorPresence(buildingId, floorId);
+		
+		if(floor==null)
+			return;
+		
+		Map<Integer,ConfRoom> confRooms=floor.getConfRooms();
+		
+		Boolean roomFound=false;
+		for(Map.Entry<Integer, ConfRoom> confRoomMap: confRooms.entrySet()) {
+					
+			ConfRoom confRoom= confRoomMap.getValue();
+			
+			if(isRoomAvailable(confRoom,date, slot) && isCapacitySufficient(confRoom, capacity)) {
+				
+				if(!roomFound)
+					System.out.println("The following rooms are available for booking:");
+				
+				System.out.println(confRoom.getConfRoomName());
+				roomFound=true;
+			}
+		}
+		
+		if(!roomFound)
+			System.out.println("No Room found according to your requirements.");
 	}
 	
 	

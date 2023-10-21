@@ -47,15 +47,19 @@ public class ConfRoom {
 	private Map<Integer,Booking> bookings;
 	int maxCapacity;
 	String confRoomName;
+	String buildingName;
+	String floorName;
 	
 	
-	public ConfRoom(int maxCapacity,String confRoomName) {
+	public ConfRoom(int maxCapacity,String confRoomName, String floorName, String buildingName) {
 		this.confRoomId= (int)(Math.random()*100);
 		this.bookSlot= new HashMap<String, TreeSet<Slot>>();
 		//Arrays.fill(this.slots, false);
 		this.bookings=new HashMap<Integer,Booking>();
 		this.maxCapacity=maxCapacity;
 		this.confRoomName=confRoomName;
+		this.floorName=floorName;
+		this.buildingName=buildingName;
 	}
 	
 	public int getConfRoomId() {
@@ -102,6 +106,14 @@ public class ConfRoom {
 	
 	public Booking unsetBooking(int Id) {
 		return this.bookings.remove(Id);
+	}
+	
+	public String getAddress() {
+		return "Address:    Building Name = " + this.buildingName + ", Floor Name = " + this.floorName + ", Conference Room Name = " + this.confRoomName;
+	}
+	
+	public String getConfRoomName() {
+	 return this.confRoomName;
 	}
 	
 }

@@ -1,9 +1,8 @@
 package com.confRoom.model;
 
-import java.sql.Date;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,22 +13,23 @@ import java.util.TreeSet;
 
 public class ConfRoom {
 	
-	public class slotComparator implements Comparator<Slot>{
+	
+	public class bookingComparator implements Comparator<Booking>{
 		
 		SimpleDateFormat parser = new SimpleDateFormat("HH:mm");
 		java.util.Date date1;
 		java.util.Date date2;
-		public int compare(Slot s1, Slot s2) {
+		public int compare(Booking b1, Booking s2) {
 			
 			try {
-				date1 =  parser.parse(s1.getSlotStartTime());
+				date1 =  parser.parse(b1.getSlot().getSlotStartTime());
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
 			try {
-				date2 = parser.parse(s2.getSlotStartTime());
+				date2 = parser.parse(s2.getSlot().getSlotEndTime());
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -37,6 +37,7 @@ public class ConfRoom {
 			return (int) (date1.getTime() - date2.getTime());
 		}
 	}
+
 	
 	private int confRoomId;
 	
@@ -44,7 +45,7 @@ public class ConfRoom {
 	
 	
 	//private Boolean[] slots; //TO DO//////////////////////////////////////////////////
-	private Map<Integer,Booking> bookings;
+	private Map<String, TreeSet<Booking>> bookings;
 	int maxCapacity;
 	String confRoomName;
 	String buildingName;
@@ -55,7 +56,7 @@ public class ConfRoom {
 		this.confRoomId= (int)(Math.random()*100);
 		this.bookSlot= new HashMap<String, TreeSet<Slot>>();
 		//Arrays.fill(this.slots, false);
-		this.bookings=new HashMap<Integer,Booking>();
+		this.bookings=new HashMap<String, TreeSet<Booking>>();
 		this.maxCapacity=maxCapacity;
 		this.confRoomName=confRoomName;
 		this.floorName=floorName;
@@ -67,45 +68,35 @@ public class ConfRoom {
 	}
 
 	
-	public Map<Integer,Booking> getBooking(){
+	public Map<String,TreeSet<Booking>> getBookings(){
 		return this.bookings;
 	}
-
+	
 	public int getMaxCapacity() {
 		return this.maxCapacity;
 	}
 	
-	public Map<String, TreeSet<Slot>> getSlots() {
-		//System.out.println(this.slots);
-		return this.bookSlot;
-	}
-	public void setSlots(String date, String[] slot) {
-		
-		Slot slotToAdd= new Slot();
-		slotToAdd.setSlotTime(slot);
-		TreeSet<Slot> slotsOfDay= this.bookSlot.get(date);
-		
-		if(slotsOfDay==null)
-			slotsOfDay= new TreeSet<Slot>(new slotComparator());
-
-		
-		slotsOfDay.add(slotToAdd);
-		this.bookSlot.put(date,slotsOfDay);
-
-	}
 	
 	public void setBooking(Booking booking) {
-		this.bookings.put(booking.getBookingId(),booking);
+		
+		String date=booking.getDate();
+		TreeSet<Booking> bookingsOfDay= this.bookings.get(date);
+		
+		if(bookingsOfDay==null)
+			bookingsOfDay= new TreeSet<Booking>(new bookingComparator());
+		
+		bookingsOfDay.add(booking);
+		
+		this.bookings.put(booking.getDate(),bookingsOfDay);
 	}
 	
-	public void unsetSlots(String date, Slot slotToRemove) {
-		TreeSet<Slot> slotsOfDay= this.bookSlot.get(date);
-		slotsOfDay.remove(slotToRemove);
+
+	
+	public void unsetBooking(Booking bookingToRemove){
+		String date= bookingToRemove.getDate();
+		TreeSet<Booking> bookingsOfDay= this.bookings.get(date);
+		bookingsOfDay.remove(bookingToRemove);
 		return;
-	}
-	
-	public Booking unsetBooking(int Id) {
-		return this.bookings.remove(Id);
 	}
 	
 	public String getAddress() {

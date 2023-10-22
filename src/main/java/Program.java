@@ -99,6 +99,28 @@ public class Program {
 				break;
 				
 			case 7:
+				System.out.println("Enter a user id: ");
+				sc= new Scanner(System.in);
+				uid= sc.nextInt();
+				bookingService.listBookingsOfUser(uid);
+				break;
+				
+			case 8:			// LIST ALL BOOKINGS OF A CONFROOM IN A GIVEN DAY
+				System.out.println("Enter a building id: ");
+				sc= new Scanner(System.in);
+				bid= sc.nextInt();
+				System.out.println("Enter a floor id: ");
+				fid= sc.nextInt();
+				System.out.println("Enter a conference room id: ");
+				cid= sc.nextInt();
+				System.out.println("Enter the date in yyyy-mm-dd format: ");
+				sc.nextLine();
+				date= sc.nextLine(); 
+				bookingService.listAllBookings(bid, fid, cid, date);
+				break;
+				
+				
+			case 9:			//SEARCH ANY ROOM IN GIVEN ADDRESS AND SLOT WITH SPECIFIC CAPACITY 
 				System.out.println("Enter a building id: ");
 				sc= new Scanner(System.in);
 				bid= sc.nextInt();
@@ -117,15 +139,29 @@ public class Program {
 				bookingService.searchRooms(bid,fid,date,slot,capacity);
 				break;
 				
-				
-			case 8:
-				System.out.println("Enter a user id: ");
+			case 10:		// SUGGEST ANY ROOM IN SAME SLOT AND CAPACITY FOR GIVEN DAYS
+				System.out.println("Enter a building id: ");
 				sc= new Scanner(System.in);
-				uid= sc.nextInt();
-				bookingService.listBookings(uid);
+				bid= sc.nextInt();
+				System.out.println("Enter a floor id: ");
+				fid= sc.nextInt(); 
+				System.out.println("Enter a capacity: ");
+				capacity= sc.nextInt();
+				slot= new String[2];
+				System.out.println("Enter booking starting time in HH:mm format:");
+				sc.nextLine();
+				slot[0]= sc.nextLine();			//slot class
+				System.out.println("Enter booking ending time in HH:mm format: ");
+				slot[1]= sc.nextLine();
+				System.out.println("Enter number of days for which you want to search ");
+				int days= sc.nextInt(); 
+				System.out.println("Enter the suggestion satrt date in yyyy-mm-dd format: ");
+				sc.nextLine();
+				date= sc.nextLine(); 
+				bookingService.suggestRooms(bid,fid,date,slot,capacity,days);
 				break;
 			
-			
+						
 			
 			case -1:
 				System.out.println("Thank you");

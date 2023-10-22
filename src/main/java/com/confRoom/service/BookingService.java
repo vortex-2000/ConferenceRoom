@@ -43,58 +43,61 @@ public class BookingService {
 	
 	private Boolean isRoomAvailable(ConfRoom confRoom,String date, String[]slot) throws ParseException {
 		
-		Map<String, TreeSet<Slot>> slots= confRoom.getSlots();
+		Map<String, TreeSet<Booking>> bookings= confRoom.getBookings();
 		
-		TreeSet<Slot> slotsOfDay=slots.get(date);
+		TreeSet<Booking> bookingsOfDay=bookings.get(date);
 		SimpleDateFormat parser = new SimpleDateFormat("HH:mm");
 		Date currStartTime = parser.parse(slot[0]);
 		Date currEndTime = parser.parse(slot[1]);
-		
+
 		LocalDate todayDate = LocalDate.parse(date);
 		
 		if(currEndTime.before(currStartTime)) {							//SPECIAL CASE (NEW TILL MIDNIGHT BOOKING): check next day
 			
 			LocalDate tomorrowDate=todayDate.plusDays(1);
 			
-			TreeSet<Slot> tomorrowSlots=slots.get(tomorrowDate.toString());
-			if(tomorrowSlots!=null) {
-			Slot tomorrowSlot=tomorrowSlots.first();
+			TreeSet<Booking> tomorrowBookings=bookings.get(tomorrowDate.toString());
+			if(tomorrowBookings!=null) {
+			Slot tomorrowSlot=tomorrowBookings.first().getSlot();
 			Date tomorrowStartTime=parser.parse(tomorrowSlot.getSlotStartTime());
 			
 			if(tomorrowStartTime.before(currEndTime))
 				return false;
 			}
 		}
-		
+
 		
 							
 		LocalDate yesterdayDate=todayDate.minusDays(1);			//SPECIAL CASE (NEW FROM MIDNIGHT BOOKING): check previous day
 		
-		TreeSet<Slot> yesterdaySlots=slots.get(yesterdayDate.toString());
-		if(yesterdaySlots!=null) {
-		Slot yesterdaySlot=yesterdaySlots.last();
+		TreeSet<Booking> yesterdayBookings=bookings.get(yesterdayDate.toString());
+		if(yesterdayBookings!=null) {
+		Slot yesterdaySlot=yesterdayBookings.last().getSlot();
 		Date yesterdayEndTime=parser.parse(yesterdaySlot.getSlotEndTime());
-		if(yesterdayEndTime.after(currStartTime))
+		Date yesterdayStartTime=parser.parse(yesterdaySlot.getSlotStartTime());
+		if(yesterdayEndTime.before(yesterdayStartTime) &&  yesterdayEndTime.after(currStartTime))
 			return false;
 		}
 		
-		if(slotsOfDay==null)
+
+		
+		if(bookingsOfDay==null)
 			return true; 
 			
-		for(Slot slotEntry : slotsOfDay) {
+		for(Booking bookingEntry : bookingsOfDay) {
 			 
 			
-			Date startTime = parser.parse(slotEntry.getSlotStartTime());
-			Date endTime = parser.parse(slotEntry.getSlotEndTime());
+			Date startTime = parser.parse(bookingEntry.getSlot().getSlotStartTime());
+			Date endTime = parser.parse(bookingEntry.getSlot().getSlotEndTime());
 			
 			//MIDNIGHT BOOKING CHECKS
-			
+
 			if(endTime.before(startTime) && (currStartTime.after(startTime) || currStartTime.equals(startTime) ||  currEndTime.after(startTime)))			
 				return false;				//MIDNIGHT BOOKING ALREADY PRESENT
-			
+
 			if(currEndTime.before(currStartTime) && (currStartTime.before(startTime) || currStartTime.equals(startTime) || currStartTime.before(endTime)))		
 				return false;				//NEW MIDNIGHT BOOKING 
-			
+
 			if(endTime.before(startTime) && currEndTime.before(currStartTime))
 				return false;				//MULTIPLE MIDNIGHT BOOKING
 			
@@ -216,19 +219,45 @@ public class BookingService {
 		
 	}
 	
-	public void listBookings(int userId) {
+	public void listBookingsOfUser(int userId) {
 		
 		User user = userRepo.checkUserPresence(userId);
 		
 		Map<Integer,Booking> bookings=user.getBookings();
 		
+		if(bookings==null) {
+			System.out.println("No Bookings for the mentioned user");
+			return;
+		}
+		
 		 for (Map.Entry<Integer,Booking> entry : bookings.entrySet()) { 
-	            System.out.println("Booking ID = " + entry.getKey() + ", Date = " + entry.getValue().getDate() + ", Slot time = " + entry.getValue().getSlot()[0] + " - " + entry.getValue().getSlot()[1]);
+	            System.out.println("Booking ID = " + entry.getKey() + ", Date = " + entry.getValue().getDate() + ", Slot time = " + entry.getValue().getSlot().getSlotStartTime() + " - " + entry.getValue().getSlot().getSlotEndTime());
 	            System.out.println(entry.getValue().getConfRoom().getAddress());
 	            System.out.println("*****************************************************************************************************************");
 	            System.out.println();
 		 }
 	}
+	
+	
+	public void listAllBookings(int buildingId, int floorId, int confRoomID, String date) {
+		
+		ConfRoom confRoom = confRoomRepo.checkConfRoomPresence(buildingId,floorId,confRoomID);
+		
+		
+		TreeSet<Booking> bookings=confRoom.getBookings().get(date);
+		
+		if(bookings==null) {
+			System.out.println("No Bookings for the day: " + date);
+			return;
+		}
+		
+		 for (Booking entry : bookings) { 
+	            System.out.println("Booking ID = " + entry.getBookingId() +  ", Slot time = " + entry.getSlot().getSlotStartTime() + " - " + entry.getSlot().getSlotEndTime());
+	            System.out.println("*****************************************************************************************************************");
+	            System.out.println();
+		 }
+	}
+	
 	
 	
 	public void searchRooms(int buildingId, int floorId, String date,  String[] slot, int capacity) throws ParseException	
@@ -250,15 +279,32 @@ public class BookingService {
 			if(isRoomAvailable(confRoom,date, slot) && isCapacitySufficient(confRoom, capacity)) {
 				
 				if(!roomFound)
-					System.out.println("The following rooms are available for booking:");
+					System.out.println("The following rooms are available for booking for slot " + slot[0] + " - " + slot[1] + " on the day " + date + " with your specific requirements:");
 				
 				System.out.println(confRoom.getConfRoomName());
 				roomFound=true;
 			}
 		}
 		
-		if(!roomFound)
-			System.out.println("No Room found according to your requirements.");
+		if(!roomFound) {
+			
+			System.out.println("No Rooms are available for slot " + slot[0] + " - " + slot[1] + " on the day " + date + " with your specific requirements");
+		}
+	}
+	
+	public void suggestRooms(int buildingId, int floorId, String date,  String[] slot, int capacity, int days) throws ParseException {
+		
+		if(days>10)
+			System.out.println("We cannot provide data for more than 10 days");
+		
+		for(int i=0;i<days;i++) {
+			
+			LocalDate currDate = LocalDate.parse(date);
+			String nextDateString= currDate.toString();
+			currDate= currDate.plusDays(1);
+			
+			searchRooms(buildingId,floorId,nextDateString,slot,capacity);
+		}	
 	}
 	
 	

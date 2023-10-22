@@ -45,7 +45,7 @@ public class BookingRepository implements IBookingRepository{
 		user.setBookings(booking);
 
 		confRoom.setBooking(booking);
-		confRoom.setSlots(booking.getDate(),booking.getSlot());
+
 	}
 	
 	public void deleteBooking(Booking booking) { 
@@ -53,12 +53,11 @@ public class BookingRepository implements IBookingRepository{
 		Bookings.remove(booking.getBookingId());
 		User user = userRepo.checkUserPresence(booking.getUserId());
 		user.unsetBookings(booking.getBookingId());
-		Slot slotToRemove= new Slot();
-		slotToRemove.setSlotTime(booking.getSlot());
+
 		
 		ConfRoom confRoom=booking.getConfRoom();
-		confRoom.unsetBooking(booking.getBookingId());
-		confRoom.unsetSlots(booking.getDate(),slotToRemove);
+		confRoom.unsetBooking(booking);
+
 
 		
 	}

@@ -61,7 +61,8 @@ public class BookingService {
 			Slot tomorrowSlot=tomorrowSlots.first();
 			Date tomorrowStartTime=parser.parse(tomorrowSlot.getSlotStartTime());
 			
-			return tomorrowStartTime.after(currEndTime);
+			if(tomorrowStartTime.before(currEndTime))
+				return false;
 			}
 		}
 		
@@ -86,19 +87,31 @@ public class BookingService {
 			Date startTime = parser.parse(slotEntry.getSlotStartTime());
 			Date endTime = parser.parse(slotEntry.getSlotEndTime());
 			
+			//MIDNIGHT BOOKING CHECKS
+			
+			if(endTime.before(startTime) && (currStartTime.after(startTime) || currStartTime.equals(startTime) ||  currEndTime.after(startTime)))			
+				return false;				//MIDNIGHT BOOKING ALREADY PRESENT
+			
+			if(currEndTime.before(currStartTime) && (currStartTime.before(startTime) || currStartTime.equals(startTime) || currStartTime.before(endTime)))		
+				return false;				//NEW MIDNIGHT BOOKING 
+			
+			if(endTime.before(startTime) && currEndTime.before(currStartTime))
+				return false;				//MULTIPLE MIDNIGHT BOOKING
+			
+			
+			/*
+			 * if(startTime.after(currEndTime)) //OPTIMIZATION break;  // AVOIDED BECAUSE OF MIDNIGHT CASES
+			 */
+			
+			
+			//NORMAL NON OVERLAP
+			 if((currEndTime.before(startTime)) || (currStartTime.after(endTime))) continue;		
 
-			if(endTime.before(startTime) || currEndTime.before(currStartTime)) {										//SPECIAL CASE (EXISTING MIDNIGHT BOOKING) check if our new booking is after this booking
-				if(currStartTime.after(startTime) || currEndTime.after(startTime)) 										//+
-					return false;																						//SPECIAL CASE (NEW TILL MIDNIGHT BOOKING) check if existing midnight booking
-																
-			}
-			
-			
-			 if(startTime.after(currEndTime)) //OPTIMIZATION  
-				  break;
-			  
-			 if((currEndTime.after(startTime)) || (currStartTime.before(endTime))) return false;
-			  
+			 else if((currEndTime.equals(startTime)) || (currStartTime.equals(endTime))) continue;
+
+			 else
+				 return false;
+		
 		
 
 		}

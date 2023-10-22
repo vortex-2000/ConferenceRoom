@@ -78,16 +78,15 @@ public class Program {
 				int cid= sc.nextInt();
 				System.out.println("Enter your user id: ");
 				uid= sc.nextInt(); 
+				System.out.println("Enter expected capacity: ");
+				capacity= sc.nextInt();
 				String[] slot= new String[2];
 				System.out.println("Enter booking starting time in HH:mm format:");
 				sc.nextLine();
 				slot[0]= sc.nextLine();			//slot class
 				System.out.println("Enter booking ending time in HH:mm format: ");
 				slot[1]= sc.nextLine();
-				System.out.println("Enter expected capacity: ");
-				capacity= sc.nextInt();
 				System.out.println("Enter the date in yyyy-mm-dd format: ");
-				sc.nextLine();
 				String date= sc.nextLine(); 
 				bookingService.bookConfRoom(bid, fid, cid, uid, capacity, date, slot);
 				break;

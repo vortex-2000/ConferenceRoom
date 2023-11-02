@@ -6,7 +6,7 @@ import java.util.Map;
 import com.confRoom.model.Booking;
 import com.confRoom.model.User;
 
-public class UserRepository {
+public class UserRepository implements IUserRepository{
 	public Map<Integer,User> Users;
 	
 	private static UserRepository UserRepository_instance = null;

@@ -41,21 +41,16 @@ public class ConfRoom {
 	
 	private int confRoomId;
 	
-	private Map<String, TreeSet<Slot>> bookSlot; //treeset //date
 	
-	
-	//private Boolean[] slots; //TO DO//////////////////////////////////////////////////
-	private Map<String, TreeSet<Booking>> bookings;
+	private Map<String, TreeSet<Booking>> bookings; //tree=sorted
 	int maxCapacity;
-	String confRoomName;
+	String confRoomName; //private
 	String buildingName;
 	String floorName;
 	
 	
 	public ConfRoom(int maxCapacity,String confRoomName, String floorName, String buildingName) {
 		this.confRoomId= (int)(Math.random()*100);
-		this.bookSlot= new HashMap<String, TreeSet<Slot>>();
-		//Arrays.fill(this.slots, false);
 		this.bookings=new HashMap<String, TreeSet<Booking>>();
 		this.maxCapacity=maxCapacity;
 		this.confRoomName=confRoomName;
@@ -77,7 +72,7 @@ public class ConfRoom {
 	}
 	
 	
-	public void setBooking(Booking booking) {
+	public void setBooking(Booking booking) {     //****** dont store booking obj in confRoom
 		
 		String date=booking.getDate();
 		TreeSet<Booking> bookingsOfDay= this.bookings.get(date);

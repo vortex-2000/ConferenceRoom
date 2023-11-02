@@ -5,7 +5,7 @@ import com.confRoom.repository.BuildingRepository;
 import com.confRoom.repository.FloorRepository;
 
 
-public class FloorService {
+public class FloorService implements IFloorService {
 	
 
 	static public BuildingRepository buildingRepo= BuildingRepository.getInstance();

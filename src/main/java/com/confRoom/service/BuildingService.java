@@ -7,15 +7,22 @@ import com.confRoom.repository.ConfRoomRepository;
 import com.confRoom.repository.FloorRepository;
 
 
-public class BuildingService {
+public class BuildingService implements IBuildingService {
 	
 	static public BuildingRepository buildingRepo= BuildingRepository.getInstance();
-	public ConfRoomRepository confRoomRepo= new ConfRoomRepository();
-	public FloorRepository floorRepo= new FloorRepository();
+	public ConfRoomRepository confRoomRepo;//private
+	public FloorRepository floorRepo;
 	
-	public int constructBuilding(String name) {
-		int id_b=buildingRepo.addBuilding(name);
-		return id_b;
+	
+	public BuildingService()
+	{
+		this.confRoomRepo=new ConfRoomRepository();  ////////// best practice
+		this.floorRepo= new FloorRepository();
+	}
+	
+	public int constructBuilding(String name) {	//addBuilding
+		int id_b=buildingRepo.addBuilding(name);   //no underscore in naming local variable (camel case)
+		return id_b;									// return building object
 		
 	}
 

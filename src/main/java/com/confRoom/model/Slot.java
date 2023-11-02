@@ -12,9 +12,12 @@ public class Slot {
 		return this.endTime;
 	}
 	
-	public void setSlotTime(String[] slot) {
-		this.startTime=slot[0];
-		this.endTime=slot[1];
+	public void setSlotStartTime(String start) {
+		this.startTime=start;
+	}
+	
+	public void setSlotEndTime(String end) {
+		this.endTime=end;
 	}
 	
 }

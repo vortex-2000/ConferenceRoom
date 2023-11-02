@@ -7,23 +7,18 @@ public class Booking {
 	private ConfRoom confRoom;
 	private Slot slot;
 	private String date;
-	
-	public Booking(int userId,ConfRoom confRoom, String date, String[]slot) {
+	//BUILDER PATTERN...
+	public Booking(int userId,ConfRoom confRoom, String date, Slot slot) {
 		this.bookingId=(int)(Math.random()*1000);
 		this.userId=userId;
 		this.confRoom=confRoom;
 		this.slot=new Slot();
-		this.slot.setSlotTime(slot);
+		this.slot=slot;
 		this.date=date;
 	}
 	
 	public int getBookingId() {
 		return this.bookingId;
-	}
-	
-	public void setSlot(String date, String[]slot) {
-		this.slot.setSlotTime(slot);
-		this.date=date;
 	}
 	
 	public Slot getSlot() {

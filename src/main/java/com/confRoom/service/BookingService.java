@@ -12,23 +12,22 @@ import java.util.Map;
 import java.util.TreeSet;
 
 
-public class BookingService {
+public class BookingService implements IBookingService{
 	
 	static public BookingRepository bookingRepo= BookingRepository.getInstance(); 
 	static public BuildingRepository buildingRepo= BuildingRepository.getInstance();
 	static public UserRepository userRepo= UserRepository.getInstance(); 
-	public ConfRoomRepository confRoomRepo= new ConfRoomRepository();
-	public FloorRepository floorRepo= new FloorRepository();
+	public IConfRoomRepository confRoomRepo= new ConfRoomRepository();
+	public IFloorRepository floorRepo= new FloorRepository();
 	
 	
 
 	
-	private Boolean isValidDuration(String[]slot) throws ParseException {
+	private Boolean isValidDuration(Slot slot) throws ParseException {
 		
 		SimpleDateFormat parser = new SimpleDateFormat("HH:mm");
-		
-		Date currStartTime = parser.parse(slot[0]);
-		Date currEndTime = parser.parse(slot[1]);
+		Date currStartTime = parser.parse(slot.getSlotStartTime());
+		Date currEndTime = parser.parse(slot.getSlotEndTime());
 		
 		
 		long difference = (currEndTime.getTime() - currStartTime .getTime())/(60 * 60 * 1000) % 24;
@@ -41,17 +40,17 @@ public class BookingService {
 	}
 	
 	
-	private Boolean isRoomAvailable(ConfRoom confRoom,String date, String[]slot) throws ParseException {
+	private Boolean isRoomAvailable(ConfRoom confRoom,String date, Slot slot) throws ParseException {
 		
-		Map<String, TreeSet<Booking>> bookings= confRoom.getBookings();
+		Map<String, TreeSet<Booking>> bookings= confRoom.getBookings();        // call 3 times instead of getting entire object 
 		
-		TreeSet<Booking> bookingsOfDay=bookings.get(date);
-		SimpleDateFormat parser = new SimpleDateFormat("HH:mm");
-		Date currStartTime = parser.parse(slot[0]);
-		Date currEndTime = parser.parse(slot[1]);
+		TreeSet<Booking> bookingsOfDay=bookings.get(date);			//get booking by date 
+		SimpleDateFormat parser = new SimpleDateFormat("HH:mm");			
+		Date currStartTime = parser.parse(slot.getSlotStartTime());
+		Date currEndTime = parser.parse(slot.getSlotEndTime());
 
-		LocalDate todayDate = LocalDate.parse(date);
-		
+		LocalDate todayDate = LocalDate.parse(date);					//SPLIT METHOD
+																		
 		if(currEndTime.before(currStartTime)) {							//SPECIAL CASE (NEW TILL MIDNIGHT BOOKING): check next day
 			
 			LocalDate tomorrowDate=todayDate.plusDays(1);
@@ -153,15 +152,16 @@ public class BookingService {
 	
 	
 	//TRY CATCH for runtime exceptions: generic message custom exception model class 
-	///////////////// RETURN ID
+	///////////////// RETURN booking object
 	@SuppressWarnings("deprecation")
-	public void bookConfRoom(int buildingId, int floorId, int confRoomId, int userId, int capacity, String date, String[]slot) throws ParseException {
-		
-		
-		////////////////////////////////////////////SLOT KO ARRAY MAT RAKHO
+	public void bookConfRoom(int buildingId, int floorId, int confRoomId, int userId, int capacity, String date, Slot slot) throws ParseException {
+
+
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		formatter = formatter.withLocale( Locale.ROOT );
 		LocalDate dt = LocalDate.parse(date, formatter);
+		
+		
 		
 		if(!isValidDate(dt)) {
 			System.out.println("New bookings starts from tomorrow.");
@@ -195,13 +195,13 @@ public class BookingService {
 		}
 		
 		if(!isCapacitySufficient(confRoom, capacity)) {
-			System.out.println("Size is less than your requirements, please try a different room");
+			System.out.println("Size is less than your requirements, please try a different room"); // throw exception object not return 
 			return;
 		}
 
 		Booking booking= new Booking(userId,confRoom,date,slot);
 				
-		bookingRepo.addBooking(booking);
+		bookingRepo.addBooking(booking);  
 		
 		System.out.println("Booking Completed. Your booking id is: " + booking.getBookingId());
 	}
@@ -215,56 +215,18 @@ public class BookingService {
 		
 	    bookingRepo.deleteBooking(booking);
 	    
-	    System.out.println("Booking Cancelled");
+	    System.out.println("Booking Cancelled");				//string return
 		
 	}
 	
-	public void listBookingsOfUser(int userId) {
-		
-		User user = userRepo.checkUserPresence(userId);
-		
-		Map<Integer,Booking> bookings=user.getBookings();
-		
-		if(bookings==null) {
-			System.out.println("No Bookings for the mentioned user");
-			return;
-		}
-		
-		 for (Map.Entry<Integer,Booking> entry : bookings.entrySet()) { 
-	            System.out.println("Booking ID = " + entry.getKey() + ", Date = " + entry.getValue().getDate() + ", Slot time = " + entry.getValue().getSlot().getSlotStartTime() + " - " + entry.getValue().getSlot().getSlotEndTime());
-	            System.out.println(entry.getValue().getConfRoom().getAddress());
-	            System.out.println("*****************************************************************************************************************");
-	            System.out.println();
-		 }
-	}
 	
+	//MOVE TO CONFROOM REPO
 	
-	public void listAllBookings(int buildingId, int floorId, int confRoomID, String date) {
-		
-		ConfRoom confRoom = confRoomRepo.checkConfRoomPresence(buildingId,floorId,confRoomID);
-		
-		
-		TreeSet<Booking> bookings=confRoom.getBookings().get(date);
-		
-		if(bookings==null) {
-			System.out.println("No Bookings for the day: " + date);
-			return;
-		}
-		
-		 for (Booking entry : bookings) { 
-	            System.out.println("Booking ID = " + entry.getBookingId() +  ", Slot time = " + entry.getSlot().getSlotStartTime() + " - " + entry.getSlot().getSlotEndTime());
-	            System.out.println("*****************************************************************************************************************");
-	            System.out.println();
-		 }
-	}
-	
-	
-	
-	public void searchRooms(int buildingId, int floorId, String date,  String[] slot, int capacity) throws ParseException	
-	{
+	public void searchRooms(int buildingId, int floorId, String date,  Slot slot, int capacity) throws ParseException	
+	{//list of room obj
 
 		
-		Floor floor = floorRepo.checkFloorPresence(buildingId, floorId);
+		Floor floor = floorRepo.checkFloorPresence(buildingId, floorId);  //service
 		
 		if(floor==null)
 			return;
@@ -279,7 +241,7 @@ public class BookingService {
 			if(isRoomAvailable(confRoom,date, slot) && isCapacitySufficient(confRoom, capacity)) {
 				
 				if(!roomFound)
-					System.out.println("The following rooms are available for booking for slot " + slot[0] + " - " + slot[1] + " on the day " + date + " with your specific requirements:");
+					System.out.println("The following rooms are available for booking for slot " + slot.getSlotStartTime() + " - " + slot.getSlotEndTime() + " on the day " + date + " with your specific requirements:");
 				
 				System.out.println(confRoom.getConfRoomName());
 				roomFound=true;
@@ -288,22 +250,23 @@ public class BookingService {
 		
 		if(!roomFound) {
 			
-			System.out.println("No Rooms are available for slot " + slot[0] + " - " + slot[1] + " on the day " + date + " with your specific requirements");
+			System.out.println("No Rooms are available for slot " + slot.getSlotStartTime() + " - " + slot.getSlotEndTime() + " on the day " + date + " with your specific requirements");
 		}
 	}
 	
-	public void suggestRooms(int buildingId, int floorId, String date,  String[] slot, int capacity, int days) throws ParseException {
-		
-		if(days>10)
+	public void suggestRooms(int buildingId, int floorId, String date,  Slot slot, int capacity, int days) throws ParseException {
+		//list of room
+		if(days>10)  //declare as constant  private NO_OF_DAYS
 			System.out.println("We cannot provide data for more than 10 days");
+		LocalDate currDate = LocalDate.parse(date);
 		
 		for(int i=0;i<days;i++) {
 			
-			LocalDate currDate = LocalDate.parse(date);
+			
 			String nextDateString= currDate.toString();
 			currDate= currDate.plusDays(1);
 			
-			searchRooms(buildingId,floorId,nextDateString,slot,capacity);
+			searchRooms(buildingId,floorId,nextDateString,slot,capacity);   	//append all res
 		}	
 	}
 	

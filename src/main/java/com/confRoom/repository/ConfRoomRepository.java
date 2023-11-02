@@ -1,12 +1,14 @@
 package com.confRoom.repository;
 
+import java.util.TreeSet;
+
+import com.confRoom.model.Booking;
 import com.confRoom.model.ConfRoom;
 import com.confRoom.model.Floor;
 
-public class ConfRoomRepository {
+public class ConfRoomRepository implements IConfRoomRepository{
 	
-	public FloorRepository floorRepo= new FloorRepository();
-	
+	public FloorRepository floorRepo= new FloorRepository();	//constructor
 	public ConfRoom checkConfRoomPresence(int buildingId,int floorId, int confRoomId) {
 		
 		Floor floor= floorRepo.checkFloorPresence(buildingId,floorId);
@@ -23,10 +25,7 @@ public class ConfRoomRepository {
 		
 		ConfRoom confRoom=new ConfRoom(maxCapacity,confRoomName, floor.getFloorName(),buildingName);
 		floor.setConfRoom(confRoom);
-		return confRoom.getConfRoomId();
+		return confRoom.getConfRoomId();  // return obj
 	}
 	
-	public void getConfRooms(Floor floor) {
-		
-	}
 }

@@ -5,7 +5,7 @@ import java.util.*;
 
 public class BuildingRepository implements IBuildingRepository{
 	
-	public Map<Integer,Building> Buildings;
+	public Map<Integer,Building> Buildings;   // variable name is small           ///private and getter
 	
 	private static BuildingRepository BuildingRepository_instance = null;
 	
@@ -21,18 +21,18 @@ public class BuildingRepository implements IBuildingRepository{
 	        return BuildingRepository_instance; 
 	    }
 	 
-	 	public Building checkBuildingPresence(int buildingId) {
+	 	public Building checkBuildingPresence(int buildingId) {               // boolean better to have getter method method 
 			Building building=Buildings.get(buildingId);		
-			if(building==null)
+			if(building==null)														///single purpose isBuildingExist
 				System.out.println("The mentioned building dosen't exists");
 			return building;
 		}
 		
-		
+		//getbuildingbyId check in service 
 
 	
 	public int addBuilding(String name) {
-		Building building= new Building(name);
+		Building building= new Building(name); // building obj as param
 		Buildings.put(building.getBuildingId(), building);
 		return building.getBuildingId();
 		

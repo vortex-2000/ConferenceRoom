@@ -42,7 +42,8 @@ public class BookingRepository implements IBookingRepository{
 		
 		Bookings.put(booking.getBookingId(), booking);
 		
-		user.setBookings(booking);
+		//put in service layer
+		user.setBookings(booking);					// ****** don't store booking in user ******  instead filter from booking 
 
 		confRoom.setBooking(booking);
 
@@ -54,7 +55,7 @@ public class BookingRepository implements IBookingRepository{
 		User user = userRepo.checkUserPresence(booking.getUserId());
 		user.unsetBookings(booking.getBookingId());
 
-		
+		//put in service layer
 		ConfRoom confRoom=booking.getConfRoom();
 		confRoom.unsetBooking(booking);
 

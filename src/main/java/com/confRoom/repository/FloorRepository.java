@@ -3,7 +3,7 @@ package com.confRoom.repository;
 import com.confRoom.model.Building;
 import com.confRoom.model.Floor;
 
-public class FloorRepository {
+public class FloorRepository implements IFloorRepository{
 
 	static public BuildingRepository buildingRepo= BuildingRepository.getInstance();
 	

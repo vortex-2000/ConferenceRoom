@@ -5,5 +5,5 @@ import com.confRoom.model.Floor;
 
 public interface IConfRoomRepository {
 	public ConfRoom checkConfRoomPresence(int buildingId,int floorId, int confRoomId);
-	public int addConfRoom(Floor floor,int maxCapacity,String confRoomName, String buildingName);
+	public int addConfRoom(Floor floor,int maxCapacity,String confRoomName, int buildingId);
 }

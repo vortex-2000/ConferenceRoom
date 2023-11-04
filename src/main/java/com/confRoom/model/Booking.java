@@ -1,3 +1,4 @@
+
 package com.confRoom.model;
 
 public class Booking {

@@ -108,7 +108,7 @@ public class Program {
 				System.out.println("Enter a user id: ");
 				sc = new Scanner(System.in);
 				uid = sc.nextInt();
-				userService.listBookingsOfUser(uid);
+				bookingService.listBookingsOfUser(uid);
 				break;
 
 			case 8: // LIST ALL BOOKINGS OF A CONFROOM IN A GIVEN DAY
@@ -122,7 +122,7 @@ public class Program {
 				System.out.println("Enter the date in yyyy-mm-dd format: ");
 				sc.nextLine();
 				date = sc.nextLine();
-				confRoomService.listAllBookings(bid, fid, cid, date);
+				bookingService.listAllBookings(bid, fid, cid, date);
 				break;
 
 			case 9:			//SEARCH ANY ROOM IN GIVEN ADDRESS AND SLOT WITH SPECIFIC CAPACITY 

@@ -10,4 +10,6 @@ public interface IBookingService {
 	public void cancelBooking(int bookingId); 
 	public void searchRooms(int buildingId, int floorId, String date,  Slot slot, int capacity) throws ParseException;
 	public void suggestRooms(int buildingId, int floorId, String date,  Slot slot, int capacity, int days) throws ParseException ;
+	public void listAllBookings(int buildingId, int floorId, int confRoomID, String date);
+	public void listBookingsOfUser(int userId);
 }

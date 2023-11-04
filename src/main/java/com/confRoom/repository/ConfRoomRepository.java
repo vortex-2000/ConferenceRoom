@@ -21,11 +21,13 @@ public class ConfRoomRepository implements IConfRoomRepository{
 	}
  
 	
-	public int addConfRoom(Floor floor,int maxCapacity,String confRoomName, String buildingName) {
+	public int addConfRoom(Floor floor,int maxCapacity,String confRoomName, int buildingId) {
 		
-		ConfRoom confRoom=new ConfRoom(maxCapacity,confRoomName, floor.getFloorName(),buildingName);
+		ConfRoom confRoom=new ConfRoom(maxCapacity,confRoomName, floor.getFloorId(),buildingId);
 		floor.setConfRoom(confRoom);
 		return confRoom.getConfRoomId();  // return obj
 	}
+	
+	
 	
 }

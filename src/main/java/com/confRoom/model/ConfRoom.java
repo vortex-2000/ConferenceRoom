@@ -14,22 +14,22 @@ import java.util.TreeSet;
 public class ConfRoom {
 	
 	
-	public class bookingComparator implements Comparator<Booking>{
-		
+	public class slotComparator implements Comparator<Slot>{
+
 		SimpleDateFormat parser = new SimpleDateFormat("HH:mm");
 		java.util.Date date1;
 		java.util.Date date2;
-		public int compare(Booking b1, Booking s2) {
-			
+		public int compare(Slot s1, Slot s2) {
+
 			try {
-				date1 =  parser.parse(b1.getSlot().getSlotStartTime());
+				date1 =  parser.parse(s1.getSlotStartTime());
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 			try {
-				date2 = parser.parse(s2.getSlot().getSlotEndTime());
+				date2 = parser.parse(s2.getSlotStartTime());
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -42,20 +42,20 @@ public class ConfRoom {
 	private int confRoomId;
 	
 	
-	private Map<String, TreeSet<Booking>> bookings; //tree=sorted
+	private Map<String, TreeSet<Slot>> bookSlot; //tree=sorted
 	int maxCapacity;
 	String confRoomName; //private
-	String buildingName;
-	String floorName;
+	int buildingId;
+	int floorId;
 	
 	
-	public ConfRoom(int maxCapacity,String confRoomName, String floorName, String buildingName) {
+	public ConfRoom(int maxCapacity,String confRoomName, int floorId, int buildingId) {
 		this.confRoomId= (int)(Math.random()*100);
-		this.bookings=new HashMap<String, TreeSet<Booking>>();
+		this.bookSlot= new HashMap<String, TreeSet<Slot>>();
 		this.maxCapacity=maxCapacity;
 		this.confRoomName=confRoomName;
-		this.floorName=floorName;
-		this.buildingName=buildingName;
+		this.floorId=floorId;
+		this.buildingId=buildingId;
 	}
 	
 	public int getConfRoomId() {
@@ -63,8 +63,8 @@ public class ConfRoom {
 	}
 
 	
-	public Map<String,TreeSet<Booking>> getBookings(){
-		return this.bookings;
+	public Map<String,TreeSet<Slot>> getSlots(){
+		return this.bookSlot;
 	}
 	
 	public int getMaxCapacity() {
@@ -75,31 +75,37 @@ public class ConfRoom {
 	public void setBooking(Booking booking) {     //****** dont store booking obj in confRoom
 		
 		String date=booking.getDate();
-		TreeSet<Booking> bookingsOfDay= this.bookings.get(date);
+		TreeSet<Slot> slotsOfDay= this.bookSlot.get(date);
 		
-		if(bookingsOfDay==null)
-			bookingsOfDay= new TreeSet<Booking>(new bookingComparator());
+		if(slotsOfDay==null)
+			slotsOfDay= new TreeSet<Slot>(new slotComparator());
 		
-		bookingsOfDay.add(booking);
+		slotsOfDay.add(booking.getSlot());
 		
-		this.bookings.put(booking.getDate(),bookingsOfDay);
+		this.bookSlot.put(booking.getDate(),slotsOfDay);
 	}
 	
 
 	
 	public void unsetBooking(Booking bookingToRemove){
 		String date= bookingToRemove.getDate();
-		TreeSet<Booking> bookingsOfDay= this.bookings.get(date);
-		bookingsOfDay.remove(bookingToRemove);
+		TreeSet<Slot> slotsOfDay= this.bookSlot.get(date);
+		slotsOfDay.remove(bookingToRemove.getSlot());
 		return;
 	}
 	
-	public String getAddress() {
-		return "Address:    Building Name = " + this.buildingName + ", Floor Name = " + this.floorName + ", Conference Room Name = " + this.confRoomName;
-	}
+	
 	
 	public String getConfRoomName() {
 	 return this.confRoomName;
+	}
+	
+	public int getBuildingId() {
+		return this.buildingId;
+	}
+	
+	public int getFloorId() {
+		return this.floorId;
 	}
 	
 }

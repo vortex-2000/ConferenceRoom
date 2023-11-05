@@ -20,10 +20,15 @@ public class BuildingService implements IBuildingService {
 		this.floorRepo= new FloorRepository();
 	}
 	
-	public int constructBuilding(String name) {	//addBuilding
-		int id_b=buildingRepo.addBuilding(name);   //no underscore in naming local variable (camel case)
-		return id_b;									// return building object
+	public Building constructBuilding(String name) {	//addBuilding
+		 //no underscore in naming local variable (camel case)
+		return buildingRepo.addBuilding(name);								// return building object
 		
+	}
+	
+	public Building getBuilding(int id)
+	{
+		return buildingRepo.Buildings.get(id);
 	}
 
 }

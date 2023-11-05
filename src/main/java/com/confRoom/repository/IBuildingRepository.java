@@ -4,6 +4,5 @@ import com.confRoom.model.Building;
 
 public interface IBuildingRepository {
 	public Building checkBuildingPresence(int buildingId);
-	public int addBuilding(String name);
-
+	public Building addBuilding(String name);
 }

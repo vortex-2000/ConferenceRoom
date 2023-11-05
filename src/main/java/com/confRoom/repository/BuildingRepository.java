@@ -31,12 +31,14 @@ public class BuildingRepository implements IBuildingRepository{
 		//getbuildingbyId check in service 
 
 	
-	public int addBuilding(String name) {
+	public Building addBuilding(String name) {
 		Building building= new Building(name); // building obj as param
 		Buildings.put(building.getBuildingId(), building);
-		return building.getBuildingId();
+		return building;
 		
 	}
+	
+	
 
 	
 }

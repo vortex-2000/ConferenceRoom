@@ -1,6 +1,8 @@
 package com.confRoom.service;
 
+import com.confRoom.model.Floor;
+
 public interface IFloorService {
 	
-	public int constructFloor(int id_b,String name);
+	public Floor constructFloor(int id_b,String name);
 }

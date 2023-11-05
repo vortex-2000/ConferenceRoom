@@ -1,6 +1,7 @@
 package com.confRoom.service;
 
 import com.confRoom.model.Building;
+import com.confRoom.model.Floor;
 import com.confRoom.repository.BuildingRepository;
 import com.confRoom.repository.FloorRepository;
 
@@ -12,11 +13,11 @@ public class FloorService implements IFloorService {
 	public FloorRepository floorRepo= new FloorRepository();
 	
 
-	public int constructFloor(int id_b,String name) {
+	public Floor constructFloor(int id_b,String name) {
 		
 		Building building = buildingRepo.checkBuildingPresence(id_b);
 		if(building==null)
-			return -1;
+			return null;
 		
 		return floorRepo.addFloor(building, name);
 	}

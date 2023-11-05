@@ -19,11 +19,11 @@ public class FloorRepository implements IFloorRepository{
 	}
 	
 	
-	public int addFloor(Building building,String floorName) {
+	public Floor addFloor(Building building,String floorName) {
 		 
 		 Floor floor=new Floor(floorName);
 		 building.setFloor(floor);
-		 return floor.getFloorId();
+		 return floor;
 	}
 	
 }

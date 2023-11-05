@@ -19,12 +19,12 @@ public class ConfRoomService implements IConfRoomService{
 	public ConfRoomRepository confRoomRepo= new ConfRoomRepository();
 	public FloorRepository floorRepo= new FloorRepository();
 	
-	public int constructConfRoom(int id_b,int id_f,int capacity,String name) {
+	public ConfRoom constructConfRoom(int id_b,int id_f,int capacity,String name) {
 		
 		Floor floor= floorRepo.checkFloorPresence(id_b,id_f);
 		
 		if(floor==null)
-			return -1;
+			return null;
 	
 		
 		return confRoomRepo.addConfRoom(floor, capacity, name, id_b);	

@@ -119,29 +119,18 @@ public class BookingRepository implements IBookingRepository{
 		return bookings;
 	}
 	
-	public void listBookingsOfUser(int userId) {
+	public Map<Integer,Booking> listBookingsOfUser(int userId) {
 		
 		User user = userRepo.checkUserPresence(userId);
 		
-		if(user==null)
-			return;
+		if(user==null) {
+			return null;
+		}
 		
 		Map<Integer,Booking> bookings=user.getBookings();
 		
-		if(bookings==null) {
-			System.out.println("No Bookings for the mentioned user");
-			return;
-		}
-		
-		
-		 for (Map.Entry<Integer,Booking> entry : bookings.entrySet()) { 
-	            System.out.println("Booking ID = " + entry.getKey() + ", Date = " + entry.getValue().getDate() + ", Slot time = " + entry.getValue().getSlot().getSlotStartTime() + " - " + entry.getValue().getSlot().getSlotEndTime());
-	            ConfRoom confRoom= entry.getValue().getConfRoom();
-	            Building building = buildingRepo.Buildings.get(confRoom.getBuildingId());
-	            System.out.println("Address:    Building Name = " + building.getBuildingName() + ", Floor Name = " + building.getFloor(confRoom.getFloorId()).getFloorName() + ", Conference Room Name = " + confRoom.getConfRoomName());
-	            System.out.println("*****************************************************************************************************************");
-	            System.out.println(); 
-		 }
+		 
+		 return bookings;
 	}
 	
 	

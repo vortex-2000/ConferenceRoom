@@ -14,7 +14,6 @@ public class UserService implements IUserService{
 	
 	public int registerUser(String name) {
 		int id_u=userRepo.addUser(name);
-		System.out.println("A new user with name " + name + " and Id " + id_u + " has been added");
 		return id_u;
 	}
 	

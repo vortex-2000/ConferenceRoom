@@ -23,11 +23,9 @@ public class UserRepository implements IUserRepository{
         return UserRepository_instance; 
     }
 	
-	public User checkUserPresence(int userId) {
+	public User getUserById(int userId) {
 		
 		User user= Users.get(userId);
-		if(user==null)
-			System.out.println("The mentioned user dosen't exists");
 		return user;
 	}
 	

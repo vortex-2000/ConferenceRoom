@@ -3,5 +3,6 @@ import com.confRoom.model.Building;
 
 public interface IBuildingService {
 	public Building constructBuilding(String name);
-	public Building getBuilding(int id);
+	public Boolean checkBuildingPresence(int buildingId);
+	
 }

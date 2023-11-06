@@ -17,4 +17,14 @@ public class UserService implements IUserService{
 		return id_u;
 	}
 	
+	public Boolean checkUserPresence(int userId) {
+		
+		if(!userRepo.Users.containsKey(userId))
+		{
+			System.out.println("The requested user is not present");
+			return false;
+		}
+		return true;
+	}
+	
 }

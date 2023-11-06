@@ -7,23 +7,18 @@ public class FloorRepository implements IFloorRepository{
 
 	static public BuildingRepository buildingRepo= BuildingRepository.getInstance();
 	
-	public Floor checkFloorPresence(int buildingId,int floorId) {
-		
-		Building building= buildingRepo.checkBuildingPresence(buildingId);
-		if(building==null) 
-			return null;
-		Floor floor= building.getFloor(floorId);
-		if(floor==null)
-			System.out.println("The mentioned floor dosen't exists");
-		return floor;
-	}
-	
+
 	
 	public Floor addFloor(Building building,String floorName) {
 		 
 		 Floor floor=new Floor(floorName);
 		 building.setFloor(floor);
 		 return floor;
+	}
+	
+	public 	Floor getFloorById(int buildingId,int floorId) {
+		
+		return  buildingRepo.Buildings.get(buildingId).getFloor(floorId);
 	}
 	
 }

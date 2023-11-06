@@ -21,14 +21,14 @@ public class BuildingRepository implements IBuildingRepository{
 	        return BuildingRepository_instance; 
 	    }
 	 
-	 	public Building checkBuildingPresence(int buildingId) {               // boolean better to have getter method method 
-			Building building=Buildings.get(buildingId);		
-			if(building==null)														///single purpose isBuildingExist
-				System.out.println("The mentioned building dosen't exists");
-			return building;
+	 	
+	 	
+		public Building getBuildingById(int id)
+		{
+			return Buildings.get(id);
 		}
 		
-		//getbuildingbyId check in service 
+		//getbuildingbyId check presence in service 
 
 	
 	public Building addBuilding(String name) {

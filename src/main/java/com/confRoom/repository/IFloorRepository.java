@@ -5,6 +5,6 @@ import com.confRoom.model.Floor;
 
 public interface IFloorRepository {
 
-	public Floor checkFloorPresence(int buildingId,int floorId);
+	public 	Floor getFloorById(int buildingId,int floorId);
 	public Floor addFloor(Building building,String floorName);
 }

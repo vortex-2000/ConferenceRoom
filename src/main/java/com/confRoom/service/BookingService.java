@@ -20,6 +20,13 @@ public class BookingService implements IBookingService {
 	static public UserRepository userRepo = UserRepository.getInstance();
 	public IConfRoomRepository confRoomRepo = new ConfRoomRepository();
 	public IFloorRepository floorRepo = new FloorRepository();
+	
+	
+	static public ConfRoomService confRoomService = new ConfRoomService(); 
+	public IUserService userService = new UserService();
+    public IFloorService floorService = new FloorService();
+	
+	
 
 	private Boolean isValidDuration(Slot slot) throws ParseException {
 
@@ -36,7 +43,7 @@ public class BookingService implements IBookingService {
 
 	}
 
-	private Boolean isRoomAvailable(ConfRoom confRoom, String date, Slot slot) throws ParseException {
+	public Boolean isRoomAvailable(ConfRoom confRoom, String date, Slot slot) throws ParseException {
 
 		Map<String, TreeSet<Slot>> slots = confRoom.getSlots(); // call 3 times instead of getting entire object
 
@@ -115,7 +122,7 @@ public class BookingService implements IBookingService {
 
 	}
 
-	private Boolean isCapacitySufficient(ConfRoom confRoom, int capacity) {
+	public  Boolean isCapacitySufficient(ConfRoom confRoom, int capacity) {
 		// private
 		if (confRoom.getMaxCapacity() < capacity) {
 			return false;
@@ -145,7 +152,16 @@ public class BookingService implements IBookingService {
 
 	// TRY CATCH for runtime exceptions: generic message custom exception model
 	// class
-	///////////////// RETURN booking object
+
+	 public Boolean checkBookingPresence(int bookingId) {
+				
+			if(!bookingRepo.Bookings.containsKey(bookingId)) {
+				System.out.println("The mentioned booking dosen't exists");
+				return false;
+			}
+			return true;
+		}
+	 
 	@SuppressWarnings("deprecation")
 	public Booking bookConfRoom(int buildingId, int floorId, int confRoomId, int userId, int capacity, String date,
 			Slot slot) throws ParseException {
@@ -168,14 +184,14 @@ public class BookingService implements IBookingService {
 			System.out.println("Booking cannot be made for more than 12 hours.");
 			return null;
 		}
-
-		ConfRoom confRoom = confRoomRepo.checkConfRoomPresence(buildingId, floorId, confRoomId); // Double DB call if
-																									// not passed
-		if (confRoom == null)
+		
+		if (!confRoomService.checkConfRoomPresence(buildingId, floorId, confRoomId))
 			return null;
+		
+		ConfRoom confRoom = confRoomRepo.getConfRoomById(buildingId, floorId, confRoomId); // Double DB call if
+		// not passed
 
-		User user = userRepo.checkUserPresence(userId);
-		if (user == null)
+		if (!userService.checkUserPresence(userId))
 			return null;
 
 		if (!isRoomAvailable(confRoom, date, slot)) {
@@ -198,10 +214,12 @@ public class BookingService implements IBookingService {
 
 	public Booking cancelBooking(int bookingId) {
 
-		Booking booking = bookingRepo.checkBookingPresence(bookingId);
+		
 
-		if (booking == null)
+		if (!checkBookingPresence(bookingId))
 			return null;
+		
+		Booking booking = bookingRepo.getBookingById(bookingId);
 
 		bookingRepo.deleteBooking(booking);
 		
@@ -209,80 +227,13 @@ public class BookingService implements IBookingService {
 
 	}
 
-	// MOVE TO CONFROOM REPO
-
-	public ArrayList<ConfRoom> searchRooms(int buildingId, int floorId, String date, Slot slot, int capacity) throws ParseException {// list
-																														// of
-																														// room
-																														// obj
-
-		Floor floor = floorRepo.checkFloorPresence(buildingId, floorId); // service
-
-		if (floor == null)
-			return null;
-
-		Map<Integer, ConfRoom> confRooms = floor.getConfRooms();
-
-		ArrayList<ConfRoom> confRoomsResult = new ArrayList<ConfRoom>();
-		
-		for (Map.Entry<Integer, ConfRoom> confRoomMap : confRooms.entrySet()) {
-
-			ConfRoom confRoom = confRoomMap.getValue();
-
-			if (isRoomAvailable(confRoom, date, slot) && isCapacitySufficient(confRoom, capacity)) {
-
-				
-				confRoomsResult.add(confRoom);
 	
-			}
-		}
-
+	public TreeSet<Booking> getBookingsByRoom(int buildingId, int floorId, int confRoomID, String date) { 
+		
+		confRoomService.checkConfRoomPresence(buildingId,floorId,confRoomID);
 		
 		
-		return confRoomsResult;
-	}
-
-	public ArrayList<ArrayList<ConfRoom> > suggestRooms(int buildingId, int floorId, String date, Slot slot, int capacity, int days)
-			throws ParseException {
-		
-		Floor floor = floorRepo.checkFloorPresence(buildingId, floorId); // service
-
-		if (floor == null)
-			return null;
-		
-		if (days > 10) { // declare as constant private NO_OF_DAYS
-			System.out.println("We cannot provide data for more than 10 days");
-			return null;
-		}
-		
-		ArrayList<ArrayList<ConfRoom> > suggestedRooms = new ArrayList<ArrayList<ConfRoom> >();
-		// list of room
-		
-		
-		ArrayList<ConfRoom> confRooms = new ArrayList<ConfRoom>();
-		// list of room
-		
-		
-		LocalDate currDate = LocalDate.parse(date);
-
-		for (int i = 0; i < days; i++) {
-
-			String nextDateString = currDate.toString();
-			currDate = currDate.plusDays(1);
-
-			confRooms= searchRooms(buildingId, floorId, nextDateString, slot, capacity); // append all res
-			
-			suggestedRooms.add(confRooms);
-		}
-		return suggestedRooms;
-	}
-
-	public TreeSet<Booking> listAllBookings(int buildingId, int floorId, int confRoomID, String date) { //getAllBooking
-		
-	confRoomRepo.checkConfRoomPresence(buildingId,floorId,confRoomID);
-		
-		
-		TreeSet<Booking> bookings=bookingRepo.getBookings(buildingId, floorId, confRoomID, date);
+		TreeSet<Booking> bookings=bookingRepo.getBookingsByRoom(buildingId, floorId, confRoomID, date);
 		
 		if(bookings==null) {
 			System.out.println("No Bookings for the day: " + date);
@@ -292,9 +243,14 @@ public class BookingService implements IBookingService {
 		 return bookings;
 	}
 	
-	public Map<Integer,Booking> listBookingsOfUser(int userId) {
+	public TreeSet<Booking> getBookingsByUser(int userId) {
 		
-		Map<Integer,Booking> bookings= bookingRepo.listBookingsOfUser(userId);
+		
+		if(!userService.checkUserPresence(userId)) {
+			return null;
+		}
+		
+		TreeSet<Booking> bookings= bookingRepo.getBookingsByUser(userId);
 		return bookings;
 	}
 	

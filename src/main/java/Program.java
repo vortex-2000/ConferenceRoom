@@ -5,11 +5,8 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeSet;
 
-import com.confRoom.model.Booking;
-import com.confRoom.model.Building;
-import com.confRoom.model.ConfRoom;
-import com.confRoom.model.Floor;
-import com.confRoom.model.Slot;
+import com.confRoom.model.*;
+import com.confRoom.repository.BuildingRepository;
 import com.confRoom.service.*;
 
 
@@ -21,71 +18,76 @@ public class Program {
 	static private IConfRoomService confRoomService = new ConfRoomService();
 	static private IBookingService bookingService = new BookingService();
 	
+	
+	//DOUBT
+	static public BuildingRepository buildingRepo= BuildingRepository.getInstance();
+	
+	
 	static private Scanner sc = new Scanner(System.in); // System.in is a standard input stream.
 
 	static public void constructBuilding()
 	{
 		System.out.println("Enter a building name: ");
 		sc.nextLine();
-		String bstr = sc.nextLine();
-		Building newBuilding = buildingService.constructBuilding(bstr);
-		System.out.println("A new building with name " + bstr + " and Id " + newBuilding.getBuildingId() + " has been added");
+		String buildingName = sc.nextLine();
+		Building newBuilding = buildingService.constructBuilding(buildingName);
+		System.out.println("A new building with name " + buildingName + " and Id " + newBuilding.getBuildingId() + " has been added");
 	}
 
 	
 	static public void constructFloor()
 	{
 		System.out.println("Enter a building id: ");
-		int bid = sc.nextInt();
+		int buildingId = sc.nextInt();
 		System.out.println("Enter a floor name: ");
 		sc.nextLine();
-		String fstr = sc.nextLine();
-		Floor newFloor = floorService.constructFloor(bid, fstr);
+		String floorName = sc.nextLine();
+		Floor newFloor = floorService.constructFloor(buildingId, floorName);
 		
 		if(newFloor==null)
 			return;
-		System.out.println("A new floor with name " + fstr + " and Id " + newFloor.getFloorId() + " has been added");
+		System.out.println("A new floor with name " + floorName + " and Id " + newFloor.getFloorId() + " has been added");
 	}
 	
 	static public void constructConfRoom()
 	{
 		System.out.println("Enter a building id: ");
 		sc = new Scanner(System.in);
-		int bid = sc.nextInt();
+		int buildingId = sc.nextInt();
 		System.out.println("Enter a floor id: ");
-		int fid = sc.nextInt();
+		int floorId = sc.nextInt();
 		System.out.println("Enter a capacity: ");
 		int capacity = sc.nextInt();
 		System.out.println("Enter a conference room name: ");
 		sc.nextLine();
-		String cstr = sc.nextLine();
-		ConfRoom newConfRoom = confRoomService.constructConfRoom(bid, fid, capacity, cstr);
+		String roomName = sc.nextLine();
+		ConfRoom newConfRoom = confRoomService.constructConfRoom(buildingId, floorId, capacity, roomName);
 		if (newConfRoom==null)
 			return;
 		
-		System.out.println("A new conference room with name " + cstr + " and Id " + newConfRoom.getConfRoomId() + " has been added");
+		System.out.println("A new conference room with name " + roomName + " and Id " + newConfRoom.getConfRoomId() + " has been added");
 	}
 	
 	static public void registerUser()
 	{
 		System.out.println("Enter your name: ");
 		sc.nextLine();
-		String ustr = sc.nextLine();
-		int uid = userService.registerUser(ustr);
-		System.out.println("A new user with name " + ustr + " and Id " + uid + " has been added");
+		String userName = sc.nextLine();
+		int userId = userService.registerUser(userName);
+		System.out.println("A new user with name " + userName + " and Id " + userId + " has been added");
 	}
 	
 	static public void bookRoom() throws ParseException
 	{
 		System.out.println("Enter a building id: ");
 		sc = new Scanner(System.in);
-		int bid = sc.nextInt();
+		int buildingId = sc.nextInt();
 		System.out.println("Enter a floor id: ");
-		int fid = sc.nextInt();
+		int floorId = sc.nextInt();
 		System.out.println("Enter a conference room id: ");
-		int cid = sc.nextInt();
+		int roomId = sc.nextInt();
 		System.out.println("Enter your user id: ");
-		int uid = sc.nextInt();
+		int userId = sc.nextInt();
 		System.out.println("Enter expected capacity: ");
 		int capacity = sc.nextInt();
 		Slot slot = new Slot();
@@ -96,7 +98,7 @@ public class Program {
 		slot.setSlotEndTime(sc.nextLine());
 		System.out.println("Enter the date in yyyy-mm-dd format: ");
 		String date = sc.nextLine();
-		Booking newBooking=bookingService.bookConfRoom(bid, fid, cid, uid, capacity, date, slot);
+		Booking newBooking=bookingService.bookConfRoom(buildingId, floorId, roomId, userId, capacity, date, slot);
 		if(newBooking==null)
 			return;
 		
@@ -114,36 +116,38 @@ public class Program {
 		System.out.println("Booking Cancelled with booking id: " + cancelledBooking.getBookingId());
 	}
 	
-	static public void listBookingByUser() {
+	static public void listBookingsByUser() {
 		System.out.println("Enter a user id: ");
 		sc = new Scanner(System.in);
-		int uid = sc.nextInt();
-		Map<Integer,Booking> bookingsByUser= bookingService.listBookingsOfUser(uid);
+		int userId = sc.nextInt();
+		TreeSet<Booking> bookingsByUser= bookingService.getBookingsByUser(userId);
 		if(bookingsByUser!=null) {
 			
-		 for (Map.Entry<Integer,Booking> entry : bookingsByUser.entrySet()) { 
-	            System.out.println("Booking ID = " + entry.getKey() + ", Date = " + entry.getValue().getDate() + ", Slot time = " + entry.getValue().getSlot().getSlotStartTime() + " - " + entry.getValue().getSlot().getSlotEndTime());
-	            ConfRoom confRoom= entry.getValue().getConfRoom();
-	            Building building = buildingService.getBuilding(confRoom.getBuildingId());
-	            System.out.println("Address:    Building Name = " + building.getBuildingName() + ", Floor Name = " + building.getFloor(confRoom.getFloorId()).getFloorName() + ", Conference Room Name = " + confRoom.getConfRoomName());
+		 for (Booking entry : bookingsByUser) { 
+	            System.out.println("Booking ID = " + entry.getBookingId() + ", Date = " + entry.getDate() + ", Slot time = " + entry.getSlot().getSlotStartTime() + " - " + entry.getSlot().getSlotEndTime());
+	            ConfRoom confRoom= entry.getConfRoom();
+	            //Building building = buildingRepo.getBuildingById(confRoom.getBuildingId());
+	            //System.out.println("Address:    Building Name = " + building.getBuildingName() + ", Floor Name = " + building.getFloor(confRoom.getFloorId()).getFloorName() + ", Conference Room Name = " + confRoom.getConfRoomName());
+	            System.out.println("Address: Conference Room Name = " + confRoom.getConfRoomName());
+
 	            System.out.println("*****************************************************************************************************************");
 	            System.out.println(); 
 		 }
 		}
 	}
 	
-	static public void listBookingOfConfRoom() {
+	static public void listBookingsOfConfRoom() {
 		System.out.println("Enter a building id: ");
 		sc = new Scanner(System.in);
-		int bid = sc.nextInt();
+		int buildingId = sc.nextInt();
 		System.out.println("Enter a floor id: ");
-		int fid = sc.nextInt();
+		int floorId = sc.nextInt();
 		System.out.println("Enter a conference room id: ");
-		int cid = sc.nextInt();
+		int roomId = sc.nextInt();
 		System.out.println("Enter the date in yyyy-mm-dd format: ");
 		sc.nextLine();
 		String date = sc.nextLine();
-		TreeSet<Booking> bookings=bookingService.listAllBookings(bid, fid, cid, date);
+		TreeSet<Booking> bookings=bookingService.getBookingsByRoom(buildingId, floorId, roomId, date);
 		
 		for (Booking entry : bookings) {
             System.out.println("Booking ID = " + entry.getBookingId() +  ", Slot time = " + entry.getSlot().getSlotStartTime() + " - " + entry.getSlot().getSlotEndTime());
@@ -155,9 +159,9 @@ public class Program {
 	static public void searchRoom() throws ParseException {
 		System.out.println("Enter a building id: ");
 		sc= new Scanner(System.in);
-		int bid= sc.nextInt();
+		int buildingId= sc.nextInt();
 		System.out.println("Enter a floor id: ");
-		int fid= sc.nextInt(); 
+		int floorId= sc.nextInt(); 
 		System.out.println("Enter a capacity: ");
 		int capacity= sc.nextInt();
 		Slot slot = new Slot();
@@ -168,7 +172,7 @@ public class Program {
 		slot.setSlotEndTime(sc.nextLine());
 		System.out.println("Enter the date in yyyy-mm-dd format: ");
 		String date= sc.nextLine(); 
-		ArrayList<ConfRoom> confRooms=bookingService.searchRooms(bid,fid,date,slot,capacity);
+		ArrayList<ConfRoom> confRooms=confRoomService.searchRooms(buildingId,floorId,date,slot,capacity);
 		
 		if(confRooms==null)
 			return;
@@ -194,9 +198,9 @@ public class Program {
 	static public void suggestRoom() throws ParseException {
 		System.out.println("Enter a building id: ");
 		sc= new Scanner(System.in);
-		int bid= sc.nextInt();
+		int buildingId= sc.nextInt();
 		System.out.println("Enter a floor id: ");
-		int fid= sc.nextInt(); 
+		int floorId= sc.nextInt(); 
 		System.out.println("Enter a capacity: ");
 		int capacity= sc.nextInt();
 		Slot slot = new Slot();
@@ -210,7 +214,7 @@ public class Program {
 		System.out.println("Enter the suggestion start date in yyyy-mm-dd format: ");
 		sc.nextLine();
 		String date= sc.nextLine(); 
-		ArrayList<ArrayList<ConfRoom>> suggestedConfRooms=bookingService.suggestRooms(bid,fid,date,slot,capacity,days);
+		ArrayList<ArrayList<ConfRoom>> suggestedConfRooms=confRoomService.suggestRooms(buildingId,floorId,date,slot,capacity,days);
 		
 		if(suggestedConfRooms==null)
 			return;
@@ -239,9 +243,6 @@ public class Program {
 	
 	
 	public static void main(String[] args) throws ParseException {
-		// TODO Auto-generated method stub
-		
-		
 
 		int action = 0;
 
@@ -276,11 +277,11 @@ public class Program {
 				break;
 
 			case 7: 		// LIST BY USER
-				listBookingByUser();
+				listBookingsByUser();
 				break;
 
 			case 8: 		// LIST ALL BOOKINGS OF A CONFROOM IN A GIVEN DAY
-				listBookingOfConfRoom();
+				listBookingsOfConfRoom();
 				break;
 
 			case 9:			//SEARCH ANY ROOM IN GIVEN ADDRESS AND SLOT WITH SPECIFIC CAPACITY 

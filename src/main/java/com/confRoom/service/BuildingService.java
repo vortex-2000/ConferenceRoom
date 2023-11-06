@@ -26,9 +26,13 @@ public class BuildingService implements IBuildingService {
 		
 	}
 	
-	public Building getBuilding(int id)
-	{
-		return buildingRepo.Buildings.get(id);
+	
+ 	public Boolean checkBuildingPresence(int buildingId) {               // boolean better to have getter method method 
+ 		if(!buildingRepo.Buildings.containsKey(buildingId)) {
+ 			System.out.println("The requested building is not present");
+			return false;
+ 		}
+ 		return true;
 	}
 
 }

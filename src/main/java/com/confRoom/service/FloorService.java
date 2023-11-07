@@ -14,20 +14,20 @@ public class FloorService implements IFloorService {
 	static public BuildingService buildingService = new BuildingService();
 	
 
-	public Floor constructFloor(int id_b,String name) {
+	public Floor addFloor(int buildingId,String name) {
 		
 		
-		if(!buildingService.checkBuildingPresence(id_b))
+		if(!buildingService.isBuildingPresent(buildingId))
 			return null;
 		
-		Building building = buildingRepo.getBuildingById(id_b);
+		Building building = buildingRepo.getBuildingById(buildingId);
 		
 		return floorRepo.addFloor(building, name);
 	}
 	
-	public Boolean checkFloorPresence(int buildingId,int floorId) {
+	public Boolean isFloorPresent(int buildingId,int floorId) {
 		
-		if(!buildingService.checkBuildingPresence(buildingId))
+		if(!buildingService.isBuildingPresent(buildingId))
 		{
 			return false;
 		}

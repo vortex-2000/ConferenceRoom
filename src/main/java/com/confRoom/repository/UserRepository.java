@@ -31,9 +31,9 @@ public class UserRepository implements IUserRepository{
 	
  
 	
-	public int addUser(String name){	
+	public User addUser(String name){	
 		User user= new User(name);
 		Users.put(user.getUserId(), user);
-		return user.getUserId();
+		return user;
 	}
 }

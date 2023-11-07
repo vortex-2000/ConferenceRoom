@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -30,17 +31,24 @@ public class BookingRepository implements IBookingRepository{
 			Slot s1= b1.getSlot();
 			Slot s2= b2.getSlot();
 			
-			LocalDate Dateb1 = LocalDate.parse(b1.getDate());
-			LocalDate Dateb2 = LocalDate.parse(b2.getDate());
-			
-			System.out.println(Dateb1);
-			System.out.println(Dateb2);
-			System.out.println("***");
+			Date Dateb1 = null;
+			try {
+				Dateb1 = new SimpleDateFormat("yyyy-MM-dd").parse(b1.getDate());
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}  
+			Date Dateb2 = null;
+			try {
+				Dateb2 = new SimpleDateFormat("yyyy-MM-dd").parse(b2.getDate());
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+			if(Dateb1==null || Dateb2==null)
+				return 0;
 			
 			if(Dateb1.equals(Dateb2)) {
-				System.out.println(Dateb1);
-				System.out.println(Dateb2);
-				System.out.println("###");
 				try {
 					date1 =  parser.parse(s1.getSlotStartTime());
 				} catch (ParseException e) {
@@ -58,9 +66,7 @@ public class BookingRepository implements IBookingRepository{
 				return (int) (date1.getTime() - date2.getTime());
 			}
 			
-			if(Dateb1.isBefore(Dateb2))
-				return 1;
-			return -1;
+			return Dateb1.compareTo(Dateb2);		
 			
 		}
 	}
@@ -87,22 +93,26 @@ public class BookingRepository implements IBookingRepository{
 	    } 
 	 
 	
-	public void addBooking(Booking booking) { 
+	public Booking addBooking(Booking booking) { 
 		ConfRoom confRoom = booking.getConfRoom();
 		User user = userRepo.Users.get(booking.getUserId());
 		
 		Bookings.put(booking.getBookingId(), booking);
 		
 		confRoom.setBooking(booking);
+		
+		return booking;
 
 	}
 	
-	public void deleteBooking(Booking booking) { 
+	public Booking deleteBooking(Booking booking) { 
 		
 		Bookings.remove(booking.getBookingId());
 		User user = userRepo.getUserById(booking.getUserId());
 		ConfRoom confRoom=booking.getConfRoom();
 		confRoom.unsetBooking(booking);
+		
+		return booking;
 		
 	}
 	

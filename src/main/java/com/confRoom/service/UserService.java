@@ -12,12 +12,11 @@ public class UserService implements IUserService{
 	
 	static public UserRepository userRepo= UserRepository.getInstance(); 
 	
-	public int registerUser(String name) {
-		int id_u=userRepo.addUser(name);
-		return id_u;
+	public User addUser(String name) {
+		return userRepo.addUser(name);
 	}
 	
-	public Boolean checkUserPresence(int userId) {
+	public Boolean isUserPresent(int userId) {
 		
 		if(!userRepo.Users.containsKey(userId))
 		{

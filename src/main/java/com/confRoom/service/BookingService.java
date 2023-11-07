@@ -6,11 +6,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TreeSet;
 
 public class BookingService implements IBookingService {
@@ -22,7 +19,7 @@ public class BookingService implements IBookingService {
 	public IFloorRepository floorRepo = new FloorRepository();
 	
 	
-	static public ConfRoomService confRoomService = new ConfRoomService(); 
+	public ConfRoomService confRoomService = new ConfRoomService(); 
 	public IUserService userService = new UserService();
     public IFloorService floorService = new FloorService();
 	
@@ -42,93 +39,7 @@ public class BookingService implements IBookingService {
 		return difference < 12;
 
 	}
-
-	public Boolean isRoomAvailable(ConfRoom confRoom, String date, Slot slot) throws ParseException {
-
-		Map<String, TreeSet<Slot>> slots = confRoom.getSlots(); // call 3 times instead of getting entire object
-
-		TreeSet<Slot> slotsOfDay = slots.get(date); // get booking by date
-		SimpleDateFormat parser = new SimpleDateFormat("HH:mm");
-		Date currStartTime = parser.parse(slot.getSlotStartTime());
-		Date currEndTime = parser.parse(slot.getSlotEndTime());
-
-		LocalDate todayDate = LocalDate.parse(date); // SPLIT METHOD
-
-		if (currEndTime.before(currStartTime)) { // SPECIAL CASE (NEW TILL MIDNIGHT BOOKING): check next day
-
-			LocalDate tomorrowDate = todayDate.plusDays(1);
-
-			TreeSet<Slot> tomorrowSlots = slots.get(tomorrowDate.toString());
-			if (tomorrowSlots != null) {
-				Slot tomorrowSlot = tomorrowSlots.first();
-				Date tomorrowStartTime = parser.parse(tomorrowSlot.getSlotStartTime());
-
-				if (tomorrowStartTime.before(currEndTime))
-					return false;
-			}
-		}
-
-		LocalDate yesterdayDate = todayDate.minusDays(1); // SPECIAL CASE (NEW FROM MIDNIGHT BOOKING): check previous
-															// day
-
-		TreeSet<Slot> yesterdayBookings = slots.get(yesterdayDate.toString());
-		if (yesterdayBookings != null) {
-			Slot yesterdaySlot = yesterdayBookings.last();
-			Date yesterdayEndTime = parser.parse(yesterdaySlot.getSlotEndTime());
-			Date yesterdayStartTime = parser.parse(yesterdaySlot.getSlotStartTime());
-			if (yesterdayEndTime.before(yesterdayStartTime) && yesterdayEndTime.after(currStartTime))
-				return false;
-		}
-
-		if (slotsOfDay == null)
-			return true;
-
-		for (Slot slotEntry : slotsOfDay) {
-
-			Date startTime = parser.parse(slotEntry.getSlotStartTime());
-			Date endTime = parser.parse(slotEntry.getSlotEndTime());
-
-			// MIDNIGHT BOOKING CHECKS
-
-			if (endTime.before(startTime) && (currStartTime.after(startTime) || currStartTime.equals(startTime)
-					|| currEndTime.after(startTime)))
-				return false; // MIDNIGHT BOOKING ALREADY PRESENT
-
-			if (currEndTime.before(currStartTime) && (currStartTime.before(startTime) || currStartTime.equals(startTime)
-					|| currStartTime.before(endTime)))
-				return false; // NEW MIDNIGHT BOOKING
-
-			if (endTime.before(startTime) && currEndTime.before(currStartTime))
-				return false; // MULTIPLE MIDNIGHT BOOKING
-
-			/*
-			 * if(startTime.after(currEndTime)) //OPTIMIZATION break; // AVOIDED BECAUSE OF
-			 * MIDNIGHT CASES
-			 */
-
-			// NORMAL NON OVERLAP
-			if ((currEndTime.before(startTime)) || (currStartTime.after(endTime)))
-				continue;
-
-			else if ((currEndTime.equals(startTime)) || (currStartTime.equals(endTime)))
-				continue;
-
-			else
-				return false;
-
-		}
-
-		return true;
-
-	}
-
-	public  Boolean isCapacitySufficient(ConfRoom confRoom, int capacity) {
-		// private
-		if (confRoom.getMaxCapacity() < capacity) {
-			return false;
-		}
-		return true;
-	}
+	
 
 	private Boolean isValidFutureDate(LocalDate bookDate) throws ParseException {
 
@@ -153,7 +64,7 @@ public class BookingService implements IBookingService {
 	// TRY CATCH for runtime exceptions: generic message custom exception model
 	// class
 
-	 public Boolean checkBookingPresence(int bookingId) {
+	 public Boolean isBookingPresent(int bookingId) {
 				
 			if(!bookingRepo.Bookings.containsKey(bookingId)) {
 				System.out.println("The mentioned booking dosen't exists");
@@ -163,7 +74,7 @@ public class BookingService implements IBookingService {
 		}
 	 
 	@SuppressWarnings("deprecation")
-	public Booking bookConfRoom(int buildingId, int floorId, int confRoomId, int userId, int capacity, String date,
+	public Booking addBooking(int buildingId, int floorId, int confRoomId, int userId, int capacity, String date,
 			Slot slot) throws ParseException {
 
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -185,21 +96,21 @@ public class BookingService implements IBookingService {
 			return null;
 		}
 		
-		if (!confRoomService.checkConfRoomPresence(buildingId, floorId, confRoomId))
+		if (!confRoomService.isConfRoomPresent(buildingId, floorId, confRoomId))
 			return null;
 		
 		ConfRoom confRoom = confRoomRepo.getConfRoomById(buildingId, floorId, confRoomId); // Double DB call if
 		// not passed
 
-		if (!userService.checkUserPresence(userId))
+		if (!userService.isUserPresent(userId))
 			return null;
 
-		if (!isRoomAvailable(confRoom, date, slot)) {
+		if (!confRoomService.isRoomAvailable(confRoom, date, slot)) {
 			System.out.println("Sorry the required slot is already booked");
 			return null;
 		}
 
-		if (!isCapacitySufficient(confRoom, capacity)) {
+		if (!confRoomService.isCapacitySufficient(confRoom, capacity)) {
 			System.out.println("Size is less than your requirements, please try a different room"); // throw exception
 																									// object not return
 			return null;
@@ -207,30 +118,29 @@ public class BookingService implements IBookingService {
 
 		Booking booking = new Booking(userId, confRoom, date, slot);
 
-		bookingRepo.addBooking(booking);
+		return bookingRepo.addBooking(booking);
 
-		return booking;
+		
 	}
 
-	public Booking cancelBooking(int bookingId) {
+	public Booking deleteBooking(int bookingId) {
 
 		
 
-		if (!checkBookingPresence(bookingId))
+		if (!isBookingPresent(bookingId))
 			return null;
 		
 		Booking booking = bookingRepo.getBookingById(bookingId);
 
-		bookingRepo.deleteBooking(booking);
+		return bookingRepo.deleteBooking(booking);
 		
-		return booking;
 
 	}
 
 	
 	public TreeSet<Booking> getBookingsByRoom(int buildingId, int floorId, int confRoomID, String date) { 
 		
-		confRoomService.checkConfRoomPresence(buildingId,floorId,confRoomID);
+		confRoomService.isConfRoomPresent(buildingId,floorId,confRoomID);
 		
 		
 		TreeSet<Booking> bookings=bookingRepo.getBookingsByRoom(buildingId, floorId, confRoomID, date);
@@ -246,7 +156,7 @@ public class BookingService implements IBookingService {
 	public TreeSet<Booking> getBookingsByUser(int userId) {
 		
 		
-		if(!userService.checkUserPresence(userId)) {
+		if(!userService.isUserPresent(userId)) {
 			return null;
 		}
 		

@@ -30,7 +30,7 @@ public class Program {
 		System.out.println("Enter a building name: ");
 		sc.nextLine();
 		String buildingName = sc.nextLine();
-		Building newBuilding = buildingService.constructBuilding(buildingName);
+		Building newBuilding = buildingService.addBuilding(buildingName);
 		System.out.println("A new building with name " + buildingName + " and Id " + newBuilding.getBuildingId() + " has been added");
 	}
 
@@ -42,7 +42,7 @@ public class Program {
 		System.out.println("Enter a floor name: ");
 		sc.nextLine();
 		String floorName = sc.nextLine();
-		Floor newFloor = floorService.constructFloor(buildingId, floorName);
+		Floor newFloor = floorService.addFloor(buildingId, floorName);
 		
 		if(newFloor==null)
 			return;
@@ -61,7 +61,7 @@ public class Program {
 		System.out.println("Enter a conference room name: ");
 		sc.nextLine();
 		String roomName = sc.nextLine();
-		ConfRoom newConfRoom = confRoomService.constructConfRoom(buildingId, floorId, capacity, roomName);
+		ConfRoom newConfRoom = confRoomService.addConfRoom(buildingId, floorId, capacity, roomName);
 		if (newConfRoom==null)
 			return;
 		
@@ -73,8 +73,8 @@ public class Program {
 		System.out.println("Enter your name: ");
 		sc.nextLine();
 		String userName = sc.nextLine();
-		int userId = userService.registerUser(userName);
-		System.out.println("A new user with name " + userName + " and Id " + userId + " has been added");
+		User user = userService.addUser(userName);
+		System.out.println("A new user with name " + userName + " and Id " + user.getUserId()+ " has been added");
 	}
 	
 	static public void bookRoom() throws ParseException
@@ -98,7 +98,7 @@ public class Program {
 		slot.setSlotEndTime(sc.nextLine());
 		System.out.println("Enter the date in yyyy-mm-dd format: ");
 		String date = sc.nextLine();
-		Booking newBooking=bookingService.bookConfRoom(buildingId, floorId, roomId, userId, capacity, date, slot);
+		Booking newBooking=bookingService.addBooking(buildingId, floorId, roomId, userId, capacity, date, slot);
 		if(newBooking==null)
 			return;
 		
@@ -109,7 +109,7 @@ public class Program {
 		System.out.println("Enter a booking id: ");
 		sc = new Scanner(System.in);
 		int bkid = sc.nextInt();
-		Booking cancelledBooking=bookingService.cancelBooking(bkid);
+		Booking cancelledBooking=bookingService.deleteBooking(bkid);
 		if(cancelledBooking==null)
 			return;
 		
@@ -126,10 +126,12 @@ public class Program {
 		 for (Booking entry : bookingsByUser) { 
 	            System.out.println("Booking ID = " + entry.getBookingId() + ", Date = " + entry.getDate() + ", Slot time = " + entry.getSlot().getSlotStartTime() + " - " + entry.getSlot().getSlotEndTime());
 	            ConfRoom confRoom= entry.getConfRoom();
-	            //Building building = buildingRepo.getBuildingById(confRoom.getBuildingId());
-	            //System.out.println("Address:    Building Name = " + building.getBuildingName() + ", Floor Name = " + building.getFloor(confRoom.getFloorId()).getFloorName() + ", Conference Room Name = " + confRoom.getConfRoomName());
-	            System.out.println("Address: Conference Room Name = " + confRoom.getConfRoomName());
-
+	            
+	            //wrapper method
+	            
+	           
+	            String address=confRoomService.getAddress(confRoom);
+	            System.out.println(address);
 	            System.out.println("*****************************************************************************************************************");
 	            System.out.println(); 
 		 }
@@ -172,7 +174,7 @@ public class Program {
 		slot.setSlotEndTime(sc.nextLine());
 		System.out.println("Enter the date in yyyy-mm-dd format: ");
 		String date= sc.nextLine(); 
-		ArrayList<ConfRoom> confRooms=confRoomService.searchRooms(buildingId,floorId,date,slot,capacity);
+		ArrayList<ConfRoom> confRooms=confRoomService.getRooms(buildingId,floorId,date,slot,capacity);
 		
 		if(confRooms==null)
 			return;
@@ -214,7 +216,7 @@ public class Program {
 		System.out.println("Enter the suggestion start date in yyyy-mm-dd format: ");
 		sc.nextLine();
 		String date= sc.nextLine(); 
-		ArrayList<ArrayList<ConfRoom>> suggestedConfRooms=confRoomService.suggestRooms(buildingId,floorId,date,slot,capacity,days);
+		ArrayList<ArrayList<ConfRoom>> suggestedConfRooms=confRoomService.getSuggestedRooms(buildingId,floorId,date,slot,capacity,days);
 		
 		if(suggestedConfRooms==null)
 			return;

@@ -1,7 +1,9 @@
 package com.confRoom.service;
 
+import com.confRoom.model.User;
+
 public interface IUserService {
 	
-	public int registerUser(String name);
-	public Boolean checkUserPresence(int userId);
+	public User addUser(String name);
+	public Boolean isUserPresent(int userId);
 }

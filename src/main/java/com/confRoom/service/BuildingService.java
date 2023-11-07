@@ -20,14 +20,14 @@ public class BuildingService implements IBuildingService {
 		this.floorRepo= new FloorRepository();
 	}
 	
-	public Building constructBuilding(String name) {	//addBuilding
+	public Building addBuilding(String name) {	//addBuilding
 		 //no underscore in naming local variable (camel case)
 		return buildingRepo.addBuilding(name);								// return building object
 		
 	}
 	
 	
- 	public Boolean checkBuildingPresence(int buildingId) {               // boolean better to have getter method method 
+ 	public Boolean isBuildingPresent(int buildingId) {               // boolean better to have getter method method 
  		if(!buildingRepo.Buildings.containsKey(buildingId)) {
  			System.out.println("The requested building is not present");
 			return false;

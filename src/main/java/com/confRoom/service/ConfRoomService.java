@@ -1,12 +1,15 @@
 package com.confRoom.service;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
 import java.util.TreeSet;
 
 import com.confRoom.model.Booking;
+import com.confRoom.model.Building;
 import com.confRoom.model.ConfRoom;
 import com.confRoom.model.Floor;
 import com.confRoom.model.Slot;
@@ -24,13 +27,101 @@ public class ConfRoomService implements IConfRoomService{
 	public ConfRoomRepository confRoomRepo= new ConfRoomRepository();
 	public FloorRepository floorRepo= new FloorRepository();
 	
-	public BookingService bookingService =new BookingService();
+
 	public FloorService floorService = new FloorService(); 
 	
-	
-	public Boolean checkConfRoomPresence(int buildingId,int floorId, int confRoomId) {
+	// transfer to confRoomService
+		public Boolean isRoomAvailable(ConfRoom confRoom, String date, Slot slot) throws ParseException {
+
+			Map<String, TreeSet<Slot>> slots = confRoom.getSlots(); // call 3 times instead of getting entire object
+
+			TreeSet<Slot> slotsOfDay = slots.get(date); // get booking by date
+			SimpleDateFormat parser = new SimpleDateFormat("HH:mm");
+			Date currStartTime = parser.parse(slot.getSlotStartTime());
+			Date currEndTime = parser.parse(slot.getSlotEndTime());
+
+			LocalDate todayDate = LocalDate.parse(date); // SPLIT METHOD
+
+			if (currEndTime.before(currStartTime)) { // SPECIAL CASE (NEW TILL MIDNIGHT BOOKING): check next day
+
+				LocalDate tomorrowDate = todayDate.plusDays(1);
+
+				TreeSet<Slot> tomorrowSlots = slots.get(tomorrowDate.toString());
+				if (tomorrowSlots != null) {
+					Slot tomorrowSlot = tomorrowSlots.first();
+					Date tomorrowStartTime = parser.parse(tomorrowSlot.getSlotStartTime());
+
+					if (tomorrowStartTime.before(currEndTime))
+						return false;
+				}
+			}
+
+			LocalDate yesterdayDate = todayDate.minusDays(1); // SPECIAL CASE (NEW FROM MIDNIGHT BOOKING): check previous
+																// day
+
+			TreeSet<Slot> yesterdayBookings = slots.get(yesterdayDate.toString());
+			if (yesterdayBookings != null) {
+				Slot yesterdaySlot = yesterdayBookings.last();
+				Date yesterdayEndTime = parser.parse(yesterdaySlot.getSlotEndTime());
+				Date yesterdayStartTime = parser.parse(yesterdaySlot.getSlotStartTime());
+				if (yesterdayEndTime.before(yesterdayStartTime) && yesterdayEndTime.after(currStartTime))
+					return false;
+			}
+
+			if (slotsOfDay == null)
+				return true;
+
+			for (Slot slotEntry : slotsOfDay) {
+
+				Date startTime = parser.parse(slotEntry.getSlotStartTime());
+				Date endTime = parser.parse(slotEntry.getSlotEndTime());
+
+				// MIDNIGHT BOOKING CHECKS
+
+				if (endTime.before(startTime) && (currStartTime.after(startTime) || currStartTime.equals(startTime)
+						|| currEndTime.after(startTime)))
+					return false; // MIDNIGHT BOOKING ALREADY PRESENT
+
+				if (currEndTime.before(currStartTime) && (currStartTime.before(startTime) || currStartTime.equals(startTime)
+						|| currStartTime.before(endTime)))
+					return false; // NEW MIDNIGHT BOOKING
+
+				if (endTime.before(startTime) && currEndTime.before(currStartTime))
+					return false; // MULTIPLE MIDNIGHT BOOKING
+
+				/*
+				 * if(startTime.after(currEndTime)) //OPTIMIZATION break; // AVOIDED BECAUSE OF
+				 * MIDNIGHT CASES
+				 */
+
+				// NORMAL NON OVERLAP
+				if ((currEndTime.before(startTime)) || (currStartTime.after(endTime)))
+					continue;
+
+				else if ((currEndTime.equals(startTime)) || (currStartTime.equals(endTime)))
+					continue;
+
+				else
+					return false;
+
+			}
+
+			return true;
+
+		}
+		// transfer to confRoomService
+		public  Boolean isCapacitySufficient(ConfRoom confRoom, int capacity) {
 		
-		if(!floorService.checkFloorPresence(buildingId,floorId))
+			if (confRoom.getMaxCapacity() < capacity) {
+				return false;
+			}
+			return true;
+		}
+	
+	
+	public Boolean isConfRoomPresent(int buildingId,int floorId, int confRoomId) {
+		
+		if(!floorService.isFloorPresent(buildingId,floorId))
 			return false;
 		
 		if(confRoomRepo.getConfRoomById(buildingId, floorId, confRoomId)==null)
@@ -43,25 +134,25 @@ public class ConfRoomService implements IConfRoomService{
 	
 
 	
-	public ConfRoom constructConfRoom(int id_b,int id_f,int capacity,String name) {
+	public ConfRoom addConfRoom(int buildingId,int floorId,int capacity,String name) {
 		
 		
 		
-		if(!floorService.checkFloorPresence(id_b,id_f))
+		if(!floorService.isFloorPresent(buildingId,floorId))
 			return null;
 	
-		Floor floor= floorRepo.getFloorById(id_b, id_f);
-		return confRoomRepo.addConfRoom(floor, capacity, name, id_b);	
+		Floor floor= floorRepo.getFloorById(buildingId, floorId);
+		return confRoomRepo.addConfRoom(floor, capacity, name, buildingId);	
 	}
 	
 	// MOVE TO CONFROOM REPO
 
-			public ArrayList<ConfRoom> searchRooms(int buildingId, int floorId, String date, Slot slot, int capacity) throws ParseException {// list
+			public ArrayList<ConfRoom> getRooms(int buildingId, int floorId, String date, Slot slot, int capacity) throws ParseException {// list
 																																// of
 																																// room
 																																// obj
 
-				if(!floorService.checkFloorPresence(buildingId, floorId))// service
+				if(!floorService.isFloorPresent(buildingId, floorId))// service
 						return null;
 				
 				Floor floor = floorRepo.getFloorById(buildingId, floorId); 
@@ -76,7 +167,7 @@ public class ConfRoomService implements IConfRoomService{
 
 					ConfRoom confRoom = confRoomMap.getValue();
 
-					if (bookingService.isRoomAvailable(confRoom, date, slot) && bookingService.isCapacitySufficient(confRoom, capacity)) {
+					if (isRoomAvailable(confRoom, date, slot) && isCapacitySufficient(confRoom, capacity)) {
 
 						
 						confRoomsResult.add(confRoom);
@@ -89,11 +180,11 @@ public class ConfRoomService implements IConfRoomService{
 				return confRoomsResult;
 			}
 
-			public ArrayList<ArrayList<ConfRoom> > suggestRooms(int buildingId, int floorId, String date, Slot slot, int capacity, int days)
+			public ArrayList<ArrayList<ConfRoom> > getSuggestedRooms(int buildingId, int floorId, String date, Slot slot, int capacity, int days)
 					throws ParseException {
 				
 
-				if (!floorService.checkFloorPresence(buildingId, floorId))
+				if (!floorService.isFloorPresent(buildingId, floorId))
 					return null;
 				
 				if (days > MAX_DAYS) {
@@ -114,11 +205,17 @@ public class ConfRoomService implements IConfRoomService{
 					String nextDateString = currDate.toString();
 					currDate = currDate.plusDays(1);
 
-					confRooms= searchRooms(buildingId, floorId, nextDateString, slot, capacity); 
+					confRooms= getRooms(buildingId, floorId, nextDateString, slot, capacity); 
 					
 					suggestedRooms.add(confRooms);
 				}
 				return suggestedRooms;
+			}
+			
+			public String getAddress(ConfRoom confRoom)
+			{
+				Building building = buildingRepo.getBuildingById(confRoom.getBuildingId());
+	            return "Address:    Building Name = " + building.getBuildingName() + ", Floor Name = " + building.getFloor(confRoom.getFloorId()).getFloorName() + ", Conference Room Name = " + confRoom.getConfRoomName();
 			}
 	
 	

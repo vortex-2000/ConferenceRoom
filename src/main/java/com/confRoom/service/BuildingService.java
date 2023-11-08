@@ -1,34 +1,28 @@
 package com.confRoom.service;
 
 import com.confRoom.model.Building;
-import com.confRoom.model.Floor;
 import com.confRoom.repository.BuildingRepository;
-import com.confRoom.repository.ConfRoomRepository;
-import com.confRoom.repository.FloorRepository;
+import com.confRoom.repository.IBuildingRepository;
 
 
 public class BuildingService implements IBuildingService {
 	
-	static public BuildingRepository buildingRepo= BuildingRepository.getInstance();
-	public ConfRoomRepository confRoomRepo;//private
-	public FloorRepository floorRepo;
-	
+	private IBuildingRepository buildingRepo;
 	
 	public BuildingService()
 	{
-		this.confRoomRepo=new ConfRoomRepository();  ////////// best practice
-		this.floorRepo= new FloorRepository();
+		buildingRepo= BuildingRepository.getInstance();
 	}
 	
-	public Building addBuilding(String name) {	//addBuilding
-		 //no underscore in naming local variable (camel case)
-		return buildingRepo.addBuilding(name);								// return building object
+	public Building addBuilding(String name) {	
+		
+		return buildingRepo.addBuilding(name);								
 		
 	}
 	
 	
- 	public Boolean isBuildingPresent(int buildingId) {               // boolean better to have getter method method 
- 		if(!buildingRepo.Buildings.containsKey(buildingId)) {
+ 	public Boolean isBuildingPresent(int buildingId) {               
+ 		if(!buildingRepo.getBuildings().containsKey(buildingId)) {
  			System.out.println("The requested building is not present");
 			return false;
  		}

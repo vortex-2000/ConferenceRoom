@@ -5,12 +5,12 @@ import java.util.*;
 
 public class BuildingRepository implements IBuildingRepository{
 	
-	public Map<Integer,Building> Buildings;   // variable name is small           ///private and getter
+	private Map<Integer,Building> buildings;   
 	
 	private static BuildingRepository BuildingRepository_instance = null;
 	
 	private BuildingRepository() {
-		Buildings=new HashMap<Integer,Building>();
+		buildings=new HashMap<Integer,Building>();
 	}
 	
 	 public static synchronized BuildingRepository getInstance() 
@@ -23,22 +23,20 @@ public class BuildingRepository implements IBuildingRepository{
 	 
 	 	
 	 	
-		public Building getBuildingById(int id)
-		{
-			return Buildings.get(id);
-		}
+	public Building getBuildingById(int id)
+	{
+		return buildings.get(id);
+	}
 		
-		//getbuildingbyId check presence in service 
 
-	
 	public Building addBuilding(String name) {
-		Building building= new Building(name); // building obj as param
-		Buildings.put(building.getBuildingId(), building);
+		Building building= new Building(name); 
+		buildings.put(building.getBuildingId(), building);
 		return building;
 		
 	}
 	
-	
-
-	
+	public Map<Integer,Building> getBuildings(){
+		return this.buildings;
+	}	
 }

@@ -4,14 +4,22 @@ import com.confRoom.model.Building;
 import com.confRoom.model.Floor;
 import com.confRoom.repository.BuildingRepository;
 import com.confRoom.repository.FloorRepository;
+import com.confRoom.repository.IBuildingRepository;
+import com.confRoom.repository.IFloorRepository;
 
 
 public class FloorService implements IFloorService {
 	
 
-	static public BuildingRepository buildingRepo= BuildingRepository.getInstance();
-	public FloorRepository floorRepo= new FloorRepository();
-	static public BuildingService buildingService = new BuildingService();
+	private IBuildingRepository buildingRepo;
+	private IFloorRepository floorRepo;
+	private IBuildingService buildingService;
+	
+	public FloorService() {
+		buildingRepo= BuildingRepository.getInstance();
+		floorRepo= new FloorRepository();
+		buildingService = new BuildingService();
+	}
 	
 
 	public Floor addFloor(int buildingId,String name) {

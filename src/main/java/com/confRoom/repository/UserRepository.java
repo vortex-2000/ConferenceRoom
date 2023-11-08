@@ -7,12 +7,12 @@ import com.confRoom.model.Booking;
 import com.confRoom.model.User;
 
 public class UserRepository implements IUserRepository{
-	public Map<Integer,User> Users;
+	private Map<Integer,User> users;
 	
 	private static UserRepository UserRepository_instance = null;
 	
 	private UserRepository() {
-		Users=new HashMap<Integer,User>();
+		users=new HashMap<Integer,User>();
 	}
 
 	public static synchronized UserRepository getInstance() 
@@ -25,7 +25,7 @@ public class UserRepository implements IUserRepository{
 	
 	public User getUserById(int userId) {
 		
-		User user= Users.get(userId);
+		User user= users.get(userId);
 		return user;
 	}
 	
@@ -33,7 +33,11 @@ public class UserRepository implements IUserRepository{
 	
 	public User addUser(String name){	
 		User user= new User(name);
-		Users.put(user.getUserId(), user);
+		users.put(user.getUserId(), user);
 		return user;
+	}
+	
+	public Map<Integer,User> getUsers(){
+		return this.users;
 	}
 }

@@ -1,12 +1,10 @@
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeSet;
 
 import com.confRoom.model.*;
-import com.confRoom.repository.BuildingRepository;
 import com.confRoom.service.*;
 
 
@@ -19,11 +17,7 @@ public class Program {
 	static private IBookingService bookingService = new BookingService();
 	
 	
-	//DOUBT
-	static public BuildingRepository buildingRepo= BuildingRepository.getInstance();
-	
-	
-	static private Scanner sc = new Scanner(System.in); // System.in is a standard input stream.
+	static private Scanner sc = new Scanner(System.in);
 
 	static public void constructBuilding()
 	{
@@ -127,9 +121,6 @@ public class Program {
 	            System.out.println("Booking ID = " + entry.getBookingId() + ", Date = " + entry.getDate() + ", Slot time = " + entry.getSlot().getSlotStartTime() + " - " + entry.getSlot().getSlotEndTime());
 	            ConfRoom confRoom= entry.getConfRoom();
 	            
-	            //wrapper method
-	            
-	           
 	            String address=confRoomService.getAddress(confRoom);
 	            System.out.println(address);
 	            System.out.println("*****************************************************************************************************************");
@@ -169,12 +160,12 @@ public class Program {
 		Slot slot = new Slot();
 		System.out.println("Enter booking starting time in HH:mm format:");
 		sc.nextLine();
-		slot.setSlotStartTime(sc.nextLine()); // slot class
+		slot.setSlotStartTime(sc.nextLine()); 
 		System.out.println("Enter booking ending time in HH:mm format: ");
 		slot.setSlotEndTime(sc.nextLine());
 		System.out.println("Enter the date in yyyy-mm-dd format: ");
 		String date= sc.nextLine(); 
-		ArrayList<ConfRoom> confRooms=confRoomService.getRooms(buildingId,floorId,date,slot,capacity);
+		ArrayList<ConfRoom> confRooms=confRoomService.getRoomsByRequirements(buildingId,floorId,date,slot,capacity);
 		
 		if(confRooms==null)
 			return;
@@ -208,7 +199,7 @@ public class Program {
 		Slot slot = new Slot();
 		System.out.println("Enter booking starting time in HH:mm format:");
 		sc.nextLine();
-		slot.setSlotStartTime(sc.nextLine()); // slot class
+		slot.setSlotStartTime(sc.nextLine()); 
 		System.out.println("Enter booking ending time in HH:mm format: ");
 		slot.setSlotEndTime(sc.nextLine());
 		System.out.println("Enter number of days for which you want to search ");

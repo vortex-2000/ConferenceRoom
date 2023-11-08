@@ -1,30 +1,24 @@
 package com.confRoom.repository;
-
-import java.text.ParseException;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeSet;
 
-import com.confRoom.model.Booking;
 import com.confRoom.model.ConfRoom;
 import com.confRoom.model.Floor;
 import com.confRoom.model.Slot;
-import com.confRoom.service.FloorService;
+
 
 public class ConfRoomRepository implements IConfRoomRepository{
 	
+	private IBuildingRepository buildingRepo;
 
-	
-	public FloorRepository floorRepo= new FloorRepository();	//constructor
-	static public BuildingRepository buildingRepo= BuildingRepository.getInstance();
-	
-	public FloorService floorService= new FloorService();
+	public ConfRoomRepository() {
+		buildingRepo= BuildingRepository.getInstance();
+	}
 	
 	
 	public ConfRoom getConfRoomById(int buildingId,int floorId,int confRoomId)
 	{	
-		return buildingRepo.Buildings.get(buildingId).getFloor(floorId).getConfRoom(confRoomId);
+		return buildingRepo.getBuildings().get(buildingId).getFloor(floorId).getConfRoom(confRoomId);
 	}
 	
 	
@@ -35,8 +29,14 @@ public class ConfRoomRepository implements IConfRoomRepository{
 		return confRoom;  
 	}
 	
+	public  Map<Integer, ConfRoom> getConfRooms(Floor floor)
+	{
+		return floor.getConfRooms();
+	}
 	
-	
+	public TreeSet<Slot> getBookedSlotsByDate(ConfRoom confRoom,String date){
 		
+		return confRoom.getSlots().get(date);
+	}
 	
 }

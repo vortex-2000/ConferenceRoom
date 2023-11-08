@@ -12,16 +12,18 @@ import java.util.TreeSet;
 
 public class BookingService implements IBookingService {
 
-	static public BookingRepository bookingRepo = BookingRepository.getInstance();
-	static public BuildingRepository buildingRepo = BuildingRepository.getInstance();
-	static public UserRepository userRepo = UserRepository.getInstance();
-	public IConfRoomRepository confRoomRepo = new ConfRoomRepository();
-	public IFloorRepository floorRepo = new FloorRepository();
-	
-	
-	public ConfRoomService confRoomService = new ConfRoomService(); 
-	public IUserService userService = new UserService();
-    public IFloorService floorService = new FloorService();
+	private IBookingRepository bookingRepo;
+	private IConfRoomRepository confRoomRepo;	
+	private IConfRoomService confRoomService; 
+	private IUserService userService;
+    
+    
+    public BookingService() {
+    	bookingRepo = BookingRepository.getInstance();
+    	confRoomRepo = new ConfRoomRepository();   	
+    	confRoomService = new ConfRoomService(); 
+    	userService = new UserService();
+    }
 	
 	
 
@@ -66,7 +68,7 @@ public class BookingService implements IBookingService {
 
 	 public Boolean isBookingPresent(int bookingId) {
 				
-			if(!bookingRepo.Bookings.containsKey(bookingId)) {
+			if(!bookingRepo.getBookings().containsKey(bookingId)) {
 				System.out.println("The mentioned booking dosen't exists");
 				return false;
 			}
@@ -99,8 +101,7 @@ public class BookingService implements IBookingService {
 		if (!confRoomService.isConfRoomPresent(buildingId, floorId, confRoomId))
 			return null;
 		
-		ConfRoom confRoom = confRoomRepo.getConfRoomById(buildingId, floorId, confRoomId); // Double DB call if
-		// not passed
+		ConfRoom confRoom = confRoomRepo.getConfRoomById(buildingId, floorId, confRoomId); 
 
 		if (!userService.isUserPresent(userId))
 			return null;

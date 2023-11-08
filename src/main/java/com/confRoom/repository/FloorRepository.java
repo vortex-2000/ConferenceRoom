@@ -5,9 +5,11 @@ import com.confRoom.model.Floor;
 
 public class FloorRepository implements IFloorRepository{
 
-	static public BuildingRepository buildingRepo= BuildingRepository.getInstance();
+	private IBuildingRepository buildingRepo;
 	
-
+	public FloorRepository() {
+		buildingRepo= BuildingRepository.getInstance();
+	}
 	
 	public Floor addFloor(Building building,String floorName) {
 		 
@@ -18,7 +20,7 @@ public class FloorRepository implements IFloorRepository{
 	
 	public 	Floor getFloorById(int buildingId,int floorId) {
 		
-		return  buildingRepo.Buildings.get(buildingId).getFloor(floorId);
+		return  buildingRepo.getBuildings().get(buildingId).getFloor(floorId);
 	}
 	
 }

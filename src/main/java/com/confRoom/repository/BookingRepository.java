@@ -21,6 +21,27 @@ import com.confRoom.model.ConfRoom.slotComparator;
 
 public class BookingRepository implements IBookingRepository{
 	
+	
+	
+	private Map<Integer,Booking> bookings=new HashMap<Integer,Booking>();
+
+	
+	private static BookingRepository BookingRepository_instance = null;
+	
+		private BookingRepository() {
+			bookings=new HashMap<Integer,Booking>();
+		}
+	
+	 public static synchronized BookingRepository getInstance() 
+	    { 
+	        if (BookingRepository_instance == null) 
+	        	BookingRepository_instance = new BookingRepository(); 
+	  
+	        return BookingRepository_instance; 
+	    } 
+	
+	
+	
 	public class bookingComparator implements Comparator<Booking>{
 
 		SimpleDateFormat parser = new SimpleDateFormat("HH:mm");
@@ -71,33 +92,12 @@ public class BookingRepository implements IBookingRepository{
 		}
 	}
 
-	
-	public Map<Integer,Booking> Bookings=new HashMap<Integer,Booking>();
-	static public UserRepository userRepo= UserRepository.getInstance();
-	static public BuildingRepository buildingRepo= BuildingRepository.getInstance();
-
-	
-	
-	private static BookingRepository BookingRepository_instance = null;
-	
-		private BookingRepository() {
-			Bookings=new HashMap<Integer,Booking>();
-		}
-	
-	 public static synchronized BookingRepository getInstance() 
-	    { 
-	        if (BookingRepository_instance == null) 
-	        	BookingRepository_instance = new BookingRepository(); 
-	  
-	        return BookingRepository_instance; 
-	    } 
 	 
 	
 	public Booking addBooking(Booking booking) { 
 		ConfRoom confRoom = booking.getConfRoom();
-		User user = userRepo.Users.get(booking.getUserId());
 		
-		Bookings.put(booking.getBookingId(), booking);
+		bookings.put(booking.getBookingId(), booking);
 		
 		confRoom.setBooking(booking);
 		
@@ -107,8 +107,7 @@ public class BookingRepository implements IBookingRepository{
 	
 	public Booking deleteBooking(Booking booking) { 
 		
-		Bookings.remove(booking.getBookingId());
-		User user = userRepo.getUserById(booking.getUserId());
+		bookings.remove(booking.getBookingId());
 		ConfRoom confRoom=booking.getConfRoom();
 		confRoom.unsetBooking(booking);
 		
@@ -119,7 +118,7 @@ public class BookingRepository implements IBookingRepository{
 	public TreeSet<Booking> getBookingsByRoom(int bid,int fid,int cid,String date)
 	{
 		TreeSet<Booking>bookings = new TreeSet<Booking>(new bookingComparator());
-		Iterator<Entry<Integer, Booking>> hmIterator = this.Bookings.entrySet().iterator();
+		Iterator<Entry<Integer, Booking>> hmIterator = this.bookings.entrySet().iterator();
 		
 		while (hmIterator.hasNext()) {
 			Entry<Integer, Booking> mapElement = hmIterator.next();
@@ -128,7 +127,6 @@ public class BookingRepository implements IBookingRepository{
 
 			if(confRoom.getConfRoomId()==cid && confRoom.getBuildingId()==bid && confRoom.getFloorId()==fid && booking.getDate().equals(date))
 				bookings.add(booking);
-			//System.out.println(booking);
 		}
 		
 		
@@ -141,7 +139,7 @@ public class BookingRepository implements IBookingRepository{
 		
 		
 		TreeSet<Booking>bookings = new TreeSet<Booking>(new bookingComparator());
-		Iterator<Entry<Integer, Booking>> hmIterator = this.Bookings.entrySet().iterator();
+		Iterator<Entry<Integer, Booking>> hmIterator = this.bookings.entrySet().iterator();
 		
 		while (hmIterator.hasNext()) {
 			Entry<Integer, Booking> mapElement = hmIterator.next();
@@ -157,7 +155,11 @@ public class BookingRepository implements IBookingRepository{
 	
 	public Booking getBookingById(int bookingId) {
 		
-		return this.Bookings.get(bookingId);
+		return this.bookings.get(bookingId);
+	}
+	
+	public Map<Integer,Booking> getBookings(){
+		return this.bookings;
 	}
 	
 	

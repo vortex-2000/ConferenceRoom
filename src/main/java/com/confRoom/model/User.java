@@ -1,5 +1,4 @@
 package com.confRoom.model;
-import java.util.*;
 
 public class User {
 	private int userId;

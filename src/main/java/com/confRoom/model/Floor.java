@@ -13,10 +13,6 @@ public class Floor {
 		this.floorName=name;
 	}
 	
-	/*
-	 * public ConfRoom getConfRooms() { return this.confRooms; }
-	 */
-	
 	public void setConfRoom(ConfRoom confRoom) {
 		this.confRooms.put(confRoom.getConfRoomId(), confRoom);
 	}

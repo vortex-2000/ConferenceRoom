@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.confRoom.model.*;
 import com.confRoom.model.ConfRoom.slotComparator;
@@ -42,7 +43,7 @@ public class BookingRepository implements IBookingRepository{
 	
 	
 	
-	public class bookingComparator implements Comparator<Booking>{
+	public class bookingComparator implements Comparator<Booking>{ //CLASS NAME CAPITAL
 
 		SimpleDateFormat parser = new SimpleDateFormat("HH:mm");
 		java.util.Date date1;
@@ -115,7 +116,7 @@ public class BookingRepository implements IBookingRepository{
 		
 	}
 	
-	public TreeSet<Booking> getBookingsByRoom(int bid,int fid,int cid,String date)
+	public TreeSet<Booking> getBookingsByRoom(int bid,int fid,int cid,String date) //BID BUILDINGiD
 	{
 		TreeSet<Booking>bookings = new TreeSet<Booking>(new bookingComparator());
 		Iterator<Entry<Integer, Booking>> hmIterator = this.bookings.entrySet().iterator();
@@ -136,16 +137,16 @@ public class BookingRepository implements IBookingRepository{
 	public TreeSet<Booking> getBookingsByUser(int userId) {
 	
 		
+		//EXTRA SPACE
 		
-		
-		TreeSet<Booking>bookings = new TreeSet<Booking>(new bookingComparator());
+		TreeSet<Booking>bookings = new TreeSet<Booking>(new bookingComparator()); 					//INTERFACE SET
 		Iterator<Entry<Integer, Booking>> hmIterator = this.bookings.entrySet().iterator();
 		
 		while (hmIterator.hasNext()) {
 			Entry<Integer, Booking> mapElement = hmIterator.next();
 			Booking booking = mapElement.getValue();
 			
-			if(booking.getUserId()==userId)
+			if(booking.getUserId()==userId)				// CURLY BRACES
 				bookings.add(booking);
 			
 		}
